@@ -30,5 +30,310 @@ library(gridExtra)
 library(ggcorrplot)
 library(patchwork)
 library(MASS)
-library(caret)
+library(spdep)
+library(RColorBrewer)
+library(spdep)
+library(spgwr)
+library(tmap)
+library(spatialreg)
+library(whitestrap)
+library(lmtest)
+library(tseries)
 ```
+
+```{r, warning=FALSE, message=FALSE, include= FALSE}
+data<-st_read("data/RegressionData.shp")
+```
+
+# Introduction
+
+# Methods
+
+## A Description of the Concept of Spatial Autocorrelation
+
+### The First Law of Geography
+
+Spatial autocorrelation is a fundamental concept in spatial statistics that describes the degree to which a variable is correlated with itself across space. It shows the relationship of values within a single variable at nearby locations, helping in understanding patterns of spatial distribution and identifying clusters or dispersions in spatial data. The concept of spatial autocorrelation is rooted in **The First Law of Geography**, which states:  
+> *"Everything is related to everything else, but near things are more related than distant things."*  
+
+This principle suggests that geographically proximate areas tend to exhibit similar characteristics due to shared environmental, economic, or social factors.
+
+Spatial autocorrelation measures how much a given variable in one location is influenced by values in nearby locations. If observations that are closer to each other in space have related values, spatial autocorrelation will be **positive**. While if observations that are closer to each other have markedly different values, spatial autocorrelation will be **negative**. 
+
+### Moran’s I: Measuring Spatial Autocorrelation
+
+**Moran’s I** is a widely used statistic for measuring spatial autocorrelation. The formula for Moran’s I is:
+
+$$
+I = \frac{N}{\sum_{i} \sum_{j} w_{ij}} \times \frac{\sum_{i} \sum_{j} w_{ij} (X_i - \bar{X}) (X_j - \bar{X})}{\sum_{i} (X_i - \bar{X})^2}
+$$
+
+where:
+
+- \( I \) is Moran’s I index,
+- \( N \) is the total number of observations (points or areal units),
+- \( w_{ij} \) is the spatial weight between locations \( i \) and \( j \),
+- \( x_i \) and \( x_j \) are the variable values at locations \( i \) and \( j \),
+- \( \bar{x} \) is the mean of the variable.
+
+A **Moran’s I** value close to **+1** indicates strong positive spatial autocorrelation (clusters of similar values), whereas a value near **-1** suggests strong negative spatial autocorrelation (dispersion). A value near **0** implies no spatial autocorrelation.
+
+### Weight Matrix
+
+When dealing with spatial data, we use **spatial weight matrices** to define relationships between observations. Given \( n \) observations, we construct an \( n \times n \) matrix that summarizes all pairwise spatial relationships in the dataset. These matrices are essential for estimating spatial regression models and calculating spatial autocorrelation indices.
+
+There are several ways to define spatial relationships within a weight matrix:
+- **Queen Contiguity Matrix**: Assigns a weight of 1 if two regions share a border or a vertex, otherwise 0.
+- **Rook Contiguity Matrix**: Assigns a weight of 1 if two regions share only a border, otherwise 0.
+- **Distance-based Matrix**: Assigns weights based on the inverse distance between observations.
+
+Throughout this report, we use a **Queen contiguity weight matrix**, which considers all neighboring regions that share either a boundary or a vertex. 
+
+Although we only use the queen contiguity weight matrix in the report, statisticians sometimes use multiple spatial weight matrices to check the robustness of the results. Since different spatial weights can capture spatial dependencies at various levels of granularity, it can make sure the results are not merely an artifact of the matrix you’re using. For instance, using a k-nearest neighbors matrix instead of queen contiguity can help assess whether spatial patterns hold under different neighborhood definitions. 
+
+### Hypothesis: Spatial Autocorrelation Significance Tests
+
+To determine whether spatial autocorrelation is statistically significant, we conduct a hypothesis test:
+
+- **Null Hypothesis (\(H_0\))**: No spatial autocorrelation, meaning that the spatial distribution of values follows a random pattern with no systematic clustering or dispersion. Each location's value is independent of the values at neighboring locations.  
+
+- **Alternative Hypothesis 1 (\(H_{a1}\))**: Positive spatial autocorrelation, meaning that similar values tend to cluster together. High values are surrounded by other high values, and low values are surrounded by other low values, forming distinct spatial patterns.  
+
+- **Alternative Hypothesis 2 (\(H_{a2}\))**: Negative spatial autocorrelation, meaning that similar values tend to disperse rather than clustered. High values are surrounded by low values and vice versa, leading to a checkerboard-like spatial distribution.  
+
+
+To test significance, we conduct **random shuffling**. This involves:  
+
+1. Randomly shuffling the variable values across spatial locations multiple times (999 permutations is used in the report).  
+2. Computing Moran’s I for each permuted dataset to generate a reference distribution.  
+3. Comparing the observed Moran’s I to this distribution to determine if it is extreme.  
+
+If the observed Moran’s I falls in the extreme tail of the simulated distribution, we reject the null hypothesis (H₀) in favor of the appropriate alternative hypothesis. A p-value less than **0.05** typically indicates significant spatial autocorrelation.  
+
+By applying this test, we conclude whether the observed clustering pattern is statistically meaningful rather than occurring by chance.  
+
+### Local Moran’s I
+
+While global Moran’s I provides a single statistic for the entire study area, **Local Indicators of Spatial Association (LISA)** provides insights into the presence of spatial autocorrelation at **individual** locations within the dataset.
+
+To determine whether local spatial autocorrelation is statistically significant, we conduct a hypothesis test:
+
+- **Null Hypothesis (\(H_0\))**: No local spatial autocorrelation at location \(i\) (\(I_i \approx 0\)).  
+  - Here, \(I_i\) represents Moran’s I at location \(i\).  
+  - This implies that the values of the variable at location \(i\) have no significant relationship with the values of the variable at neighboring locations \(j\).  
+
+- **Alternative Hypothesis (\(H_a\))**: Presence of local spatial autocorrelation at location \(i\) (\(I_i \neq 0\)).  
+  - This means that the values at location \(i\) are either very similar to those at neighboring locations (indicating **positive spatial autocorrelation**) or significantly different from nearby values (indicating **negative spatial autocorrelation**).  
+
+
+Significance tests for local Moran’s I are also conducted using **random shuffling** to ensure that identified clusters are not due to random chance: 
+
+1. Randomly reshuffling the values of the variable across the study area while keeping the value at location \(i\) constant.  
+2. Performing random shufflings.  
+3. Calculating \(I_i\) for each reshuffled dataset.  
+4. Ranking the original \(I_i\) value against the distribution of permuted values.  
+
+If the observed \(I_i\) is extremely high or low compared to the reshuffled values, it is considered significant. The **pseudosignificance value** is estimated by noting the rank of the actual \(I_i\) among the permutations. For instance, if the original \(I_i\) ranks as the 97th highest among 999 permutations, the estimated pseudosignificance is **\(p \approx 0.097\)**.
+
+
+## A Review of OLS Regression and Assumptions
+
+
+
+## Spatial Lag and Spatial Error Regression
+
+
+## Geographically Weighted Regression
+
+
+
+
+# Results
+
+## Spatial Autocorrelation 
+
+## A Review of OLS Regression and Assumptions: Results 
+
+
+## Spatial Lag and Spatial Error Regression Results 
+
+
+## Geographically Weighted Regression Results、
+
+
+
+# Discussion
+
+```{r}
+# a. recreate variable
+data<-data%>%
+  mutate(LNNBELPOV100 = log(1+NBelPov100))
+```
+
+```{r}
+# b. Create a Queen weight file 
+queen <- poly2nb(data, row.names=data$POLY_I) 
+summary(queen)
+```
+
+```{r}
+# c. Global Moran's I for LNMEHVAL
+queenlist<-nb2listw(queen, style = 'W')
+moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I` 
+```
+
+```{r}
+# Perform 999 permutation tests
+moranMC<-moran.mc(data$LNMEDHVAL, queenlist, nsim=999, alternative="two.sided")
+moranMC
+```
+
+```{r}
+# plot histogram
+moranMCres<-moranMC$res
+hist(moranMCres, freq=10000000, nclass=100)   #Draws distribution of Moran's I's calculated from randomly permuted values
+# Here, we draw a red vertical line at the observed value of our Moran's I
+abline(v=moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I`, col='red')  
+
+```
+
+```{r}
+# plot scatter
+moran.plot(data$LNMEDHVAL, queenlist) 
+```
+
+
+```{r}
+# d. Local Moran's I (LISA analysis) for LNMEHVAL
+lmoran<-localmoran(data$LNMEDHVAL, queenlist)
+head(lmoran)
+```
+
+```{r}
+df.lmoran <-cbind(data, as.data.frame(lmoran))
+```
+
+
+```{r}
+tmap_mode("plot")
+
+#Obtaining the Local Moran's P-Values (two-sided)
+data$lmp <- lmoran[, "Pr(z != E(Ii))"]
+
+data <- st_make_valid(data) 
+
+
+#Creating the LISA Clusters
+mp <- moran.plot(as.vector(scale(data$LNMEDHVAL)), queenlist)
+```
+
+```{r}
+#Significance Map and Cluster Map
+
+data$quadrant <- NA
+# high-high
+data[(mp$x >= 0 & mp$wx >= 0) & (data$lmp <= 0.05), "quadrant"]<- 1
+# low-low
+data[(mp$x <= 0 & mp$wx <= 0) & (data$lmp <= 0.05), "quadrant"]<- 2
+# high-low
+data[(mp$x >= 0 & mp$wx <= 0) & (data$lmp <= 0.05), "quadrant"]<- 3
+# low-high
+data[(mp$x <= 0 & mp$wx >= 0) & (data$lmp <= 0.05), "quadrant"]<- 4
+# non-significant
+data[(data$lmp > 0.05), "quadrant"] <- 5
+
+
+# LISA P-Value Map
+p_vals <- tm_shape(data) +
+  tm_polygons(col = "lmp", title = "",
+              breaks = c(-Inf, 0.001, 0.01, 0.05, Inf),
+              palette = c("darkblue", "blue", "lightblue", "white")) +
+  tm_layout(
+    legend.outside = TRUE,
+    legend.text.size = 1,
+    legend.title.size = 1,
+    fontfamily = "Arial",
+    title = "LISA P-Value Map",
+    title.size = 1.2,
+    frame = FALSE
+  )
+
+# LISA Cluster Map
+clusters <- tm_shape(data) +
+  tm_fill(col = "quadrant", title = "",
+          breaks = c(1, 2, 3, 4, 5, 6),
+          palette = c("red", "blue", "lightpink", "skyblue2", "white"),
+          labels = c("High-High", "Low-Low", "High-Low", "Low-High", "Non-significant")) +
+  tm_borders(alpha = 0.5) +
+  tm_layout(
+    frame = FALSE,
+    legend.outside = TRUE,
+    legend.text.size = 1,
+    legend.title.size = 1,
+    fontfamily = "Arial",
+    title = "LISA Cluster Map",
+    title.size = 1.2
+  )
+
+p_vals
+
+clusters
+```
+
+
+
+```{r}
+# e. OLS Regression Analysis
+reg<-lm(LNMEDHVAL ~ LNNBELPOV+PCTBACHMOR+PCTSINGLES+PCTVACANT, data=data)
+summary(reg)
+```
+
+```{r}
+# g.  OLS residuals plotted 
+data$OLS_RESIDU<-rstandard(reg)
+data$WT_RESIDU<-sapply(queen, function(x) mean(data$OLS_RESIDU[x]))
+
+OLS.Residuals.Map<-tm_shape(data)+
+  tm_fill(col='OLS_RESIDU', style='quantile', title='Standardized OLS Residuals', 
+          palette ='Blues')+
+  tm_layout(frame=FALSE, title = 'Standardised OLS Residuals')
+OLS.Residuals.Map
+```
+
+
+```{r}
+# scatterplot of OLS_RESIDU by WT_RESIDU
+ggplot(data, aes(x = WT_RESIDU, y = OLS_RESIDU)) +
+  geom_point(color = "blue", alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Scatter Plot of OLS Residuals vs. Weighted Residuals", 
+       x = "Weighted Residuals (WT_RESIDU)", 
+       y = "OLS Residuals (OLS_RESIDU)") +
+  theme_minimal()
+
+# Run simple regression of OLS_RESIDU on WT_RESIDU
+lm_residuals <- lm(OLS_RESIDU ~ WT_RESIDU, data = data)
+summary(lm_residuals)
+```
+
+
+```{r}
+# h. Moran’s I of the OLS regression residuals
+
+#Regressing residuals on their nearest neighbors.
+res.lm <- lm(formula=data$OLS_RESIDU ~ data$WT_RESIDU)
+summary(res.lm)
+```
+
+```{r}
+moran.mc(data$OLS_RESIDU, queenlist, 999, alternative="two.sided")
+```
+
+```{r}
+moran.plot(data$OLS_RESIDU, queenlist)
+```
+
+
+
+
+
