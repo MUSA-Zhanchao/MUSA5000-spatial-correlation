@@ -138,6 +138,55 @@ If the observed \(I_i\) is extremely high or low compared to the reshuffled valu
 
 ## A Review of OLS Regression and Assumptions
 
+### Limitation of OLS Regression
+
+To analyze the relationship between socioeconomic factors and median house values in Philadelphia, we often use OLS (Ordinary Least Squares) Regression. By examining these relationships, we aim to identify critical predictors of median housing values throughout Philadelphia and offer insights for decision-makers and community initiatives. The key assumptions of OLS regression include:
+
+- **Linearity** assumes that the relationship between the dependent variable and the predictors is linear. To verify this assumption, we made scatter plots of the dependent variable against each predictor. If the relationship appears to be linear, the assumptions was met.
+
+-  **Independence of Observations** assumes that the observations are independent of each other. There should be no spatial or temporal or other forms of dependence in the data. 
+
+- **Homoscedasticity** assumes that the variance of the residuals \(\epsilon\) is constant regardless of the values of each level of the predictors. To check this assumption, we made a scatter plot of the standardized residuals against the predicted values. If the residuals are evenly spread around zero, the assumption was met. Any patterns may indicate the presence of heteroscedasticity.
+
+- **Normality of Residuals** assumes that the residuals are normally distributed. We examined the histogram of the standardized residuals to check if they are approximately normally distributed. If the histogram is bell-shaped, the assumption was met.
+
+- **No Multicollinearity** assumes that the predictors are not highly correlated with each other. We calculated the correlation matrix of the predictors to check for multicollinearity. If the correlation coefficients are is not greater than 0.8 or less than -0.8, the assumption was met.
+
+- **No Fewer than 10 Observations per Predictor** assumes that there are at least 10 observations for each predictor in the model. Since there are over 1,700 observations in the dataset, this assumption was met.
+
+A vital assumption of OLS regression is that **observations are independent of each other**. However, in spatial data, observations that are geographically close often exhibit similarity, leading to spatial autocorrelation and violating the independence assumption. When spatial autocorrelation is present, values of a variable in nearby areas are related rather than randomly distributed.
+
+Furthermore, when data has a spatial component, the assumption of **normality of residuals** often—but not necessarily—fails to hold. In some cases, spatial autocorrelation does not significantly impact regression analysis. If the dependent variable exhibits strong spatial autocorrelation while the error term does not, the regression coefficients and significance levels remain valid. Additionally, if both the dependent and independent variables share an identical spatial pattern, and the spatial dependencies in the dependent variable are fully explained by those in the independent variable, the residuals may be spatially independent. However, this is not always the case, and it is essential to test for spatial autocorrelation in residuals to ensure the validity of the model.
+
+### Test for Sparial Autocorrelation
+
+To test this assumption, spatial autocorrelation of the residuals can be examined using Moran’s I, which measures whether residuals are clustered, dispersed, or randomly distributed in space. As mentioned in before, it is first extract the residuals and define a spatial weights matrix (e.g., Queen or Rook contiguity). Then, Moran’s I is computed to measure the degree of clustering in residuals, with values close to +1 indicating positive spatial autocorrelation, -1 indicating negative autocorrelation, and 0 suggesting randomness. 
+
+Another method to test for spatial autocorrelation in OLS residuals is to regress them on the residuals from nearby observations. In this report, nearby residuals refer to residuals from neighboring block groups, as defined by the Queen matrix. The regression line between the residuals, `OLS_RESIDU` and `WT_RESIDU` (weighted residuals from neighboring groups), help identify any spatial autocorrelation. The **slope (b)** of this regression represents the strength of spatial dependence. It is calculated by estimating the relationship between the residuals of one observation and those of its neighbors.
+
+- If **b>0**, there is positive spatial autocorrelation, meaning areas with high residuals tend to be near other areas with high residuals (or low near low).
+- If **b<0**, there is negative spatial autocorrelation, meaning areas with high residuals are surrounded by areas with low residuals (and vice versa).
+- If **b≈0**, there is no spatial autocorrelation, suggesting that the residuals are randomly distributed.
+
+### Other regression assumptions
+
+As we use R for analysis, it also provide methods for testing other regression assumptions.
+
+One is **Homoscedasticity**, which is tied to the independence of errors. In R, tests such as the **Breusch-Pagan Test**, **Koenker-Bassett Test**(also known as the Studentized Breusch-Pagan Test) or **White Test** are used to detect heteroscedasticity.
+
+- **Null hypothesis (H₀):** The errors have constant variance (homoscedasticity).  
+- **Alternative hypothesis (H₁):** The errors have non-constant variance (heteroscedasticity).  
+
+If the p-value is less than 0.05, then we can reject the null hypothesis for the alternate hypothesis of
+heteroscedasticity.  
+
+Another is **Normality of Errors**, which ensures that residuals are normally distributed is crucial for valid hypothesis testing and confidence intervals. In R, tests such as the **Jarque-Bera Test ** can be used.
+
+- **Null hypothesis (H₀):** The residuals follow a normal distribution.  
+- **Alternative hypothesis (H₁):** The residuals do not follow a normal distribution.  
+
+The p-value determines whether the residuals follow a normal distribution. If the p-value is less than 0.05, then we can reject the Null Hypothesis of normality for the alternative
+hypothesis of non-normality. 
 
 
 ## Spatial Lag and Spatial Error Regression
