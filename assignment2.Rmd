@@ -3,7 +3,7 @@ title: 'MUSA 5000 Assignment 2: Using Geographically Weighted Regression, Spatia
   Lag, and Spatial Error to Predict Median House Values in Philadelphia'
 author: "Zhanchao Yang, Haoyu Zhu, Kavana Raju"
 date: "`r Sys.Date()`"
-output: 
+output:
   html_document:
     theme: flatly
     highlight: tango
@@ -20,8 +20,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(sf)
 library(tidycensus)
-library(knitr) 
-library(gt) 
+library(knitr)
+library(gt)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -53,13 +53,13 @@ data<-st_read("data/RegressionData.shp")
 
 ### The First Law of Geography
 
-Spatial autocorrelation describes the degree to which a variable is correlated with itself across space. It shows the relationship of values within a single variable at nearby locations, helping in understanding patterns of spatial distribution and identifying clusters or dispersions in spatial data. The concept of spatial autocorrelation is rooted in **The First Law of Geography**, which states:  
+Spatial autocorrelation describes the degree to which a variable is correlated with itself across space. It shows the relationship of values within a single variable at nearby locations, helping in understanding patterns of spatial distribution and identifying clusters or dispersions in spatial data. The concept of spatial autocorrelation is rooted in **The First Law of Geography**, which states:
 
-> *"Everything is related to everything else, but near things are more related than distant things."*  
+> *"Everything is related to everything else, but near things are more related than distant things."*
 
 This principle suggests that geographically proximate areas tend to exhibit similar characteristics due to shared environmental, economic, or social factors.
 
-Spatial autocorrelation measures how much a variable in one location is influenced by values in nearby locations. If observations that are closer to each other in space have related values, spatial autocorrelation will be **positive**. While if observations that are closer to each other have markedly different values, spatial autocorrelation will be **negative**. 
+Spatial autocorrelation measures how much a variable in one location is influenced by values in nearby locations. If observations that are closer to each other in space have related values, spatial autocorrelation will be **positive**. While if observations that are closer to each other have markedly different values, spatial autocorrelation will be **negative**.
 
 ### Moran’s I: Measuring Spatial Autocorrelation
 
@@ -85,24 +85,24 @@ When dealing with spatial data, we use **spatial weight matrices** to define rel
 
 There are several ways to define spatial relationships within a weight matrix. **Queen Contiguity Matrix** assigns a weight of 1 if two regions share a border or a vertex, otherwise 0. **Rook Contiguity Matrix** assigns a weight of 1 if two regions share only a border, otherwise 0. **Distance-based Matrix** assigns weights based on the inverse distance between observations.
 
-In this report, we use the **Queen contiguity weight matrix**, which considers all neighboring regions that share either a boundary or a vertex. 
+In this report, we use the **Queen contiguity weight matrix**, which considers all neighboring regions that share either a boundary or a vertex.
 
-Although we only use the queen contiguity weight matrix in the report, statisticians always use multiple spatial weight matrices to check the robustness of the results. Since different spatial weights can capture spatial dependencies at various levels of granularity, it can make sure the results are not merely an artifact of the matrix you’re using. 
+Although we only use the queen contiguity weight matrix in the report, statisticians always use multiple spatial weight matrices to check the robustness of the results. Since different spatial weights can capture spatial dependencies at various levels of granularity, it can make sure the results are not merely an artifact of the matrix you’re using.
 
 ### Hypothesis: Spatial Autocorrelation Significance Tests
 
 To determine whether spatial autocorrelation is statistically significant, we conduct a hypothesis test:
 
-- **Null Hypothesis (\(H_0\))**: No spatial autocorrelation, meaning that the spatial distribution of values follows a random pattern with no systematic clustering or dispersion. Each location's value is independent of the values at neighboring locations.  
+- **Null Hypothesis (\(H_0\))**: No spatial autocorrelation, meaning that the spatial distribution of values follows a random pattern with no systematic clustering or dispersion. Each location's value is independent of the values at neighboring locations.
 
-- **Alternative Hypothesis 1 (\(H_{a1}\))**: Positive spatial autocorrelation, meaning that similar values tend to cluster together. High values are surrounded by other high values, and low values are surrounded by other low values, forming distinct spatial patterns.  
+- **Alternative Hypothesis 1 (\(H_{a1}\))**: Positive spatial autocorrelation, meaning that similar values tend to cluster together. High values are surrounded by other high values, and low values are surrounded by other low values, forming distinct spatial patterns.
 
-- **Alternative Hypothesis 2 (\(H_{a2}\))**: Negative spatial autocorrelation, meaning that similar values tend to disperse rather than clustered. High values are surrounded by low values and vice versa, leading to a checkerboard-like spatial distribution.  
+- **Alternative Hypothesis 2 (\(H_{a2}\))**: Negative spatial autocorrelation, meaning that similar values tend to disperse rather than clustered. High values are surrounded by low values and vice versa, leading to a checkerboard-like spatial distribution.
 
 
-To test significance, we conduct **random shuffling**. Firstly, we randomly shuffle the variable values across spatial locations multiple times (999 permutations is used in the report). Then, we compute Moran’s I for each permuted dataset to generate a reference distribution. We compare the observed Moran’s I to this distribution to determine if it is extreme, concluding whether the observed clustering pattern is statistically meaningful rather than occurring by chance.  
+To test significance, we conduct **random shuffling**. Firstly, we randomly shuffle the variable values across spatial locations multiple times (999 permutations is used in the report). Then, we compute Moran’s I for each permuted dataset to generate a reference distribution. We compare the observed Moran’s I to this distribution to determine if it is extreme, concluding whether the observed clustering pattern is statistically meaningful rather than occurring by chance.
 
-If the observed Moran’s I falls in the extreme tail of the simulated distribution, we reject the null hypothesis (H₀) in favor of the appropriate alternative hypothesis. A p-value less than **0.05** typically indicates significant spatial autocorrelation.  
+If the observed Moran’s I falls in the extreme tail of the simulated distribution, we reject the null hypothesis (H₀) in favor of the appropriate alternative hypothesis. A p-value less than **0.05** typically indicates significant spatial autocorrelation.
 
 ### Local Moran’s I
 
@@ -110,12 +110,12 @@ While global Moran’s I provides a single statistic for the entire study area, 
 
 To determine whether local spatial autocorrelation is statistically significant, we conduct a hypothesis test:
 
-- **Null Hypothesis (\(H_0\))**: No local spatial autocorrelation at location \(i\) (\(I_i \approx 0\)).  
-  - Here, \(I_i\) represents Moran’s I at location \(i\).  
-  - This implies that the values of the variable at location \(i\) have no significant relationship with the values of the variable at neighboring locations \(j\).  
+- **Null Hypothesis (\(H_0\))**: No local spatial autocorrelation at location \(i\) (\(I_i \approx 0\)).
+  - Here, \(I_i\) represents Moran’s I at location \(i\).
+  - This implies that the values of the variable at location \(i\) have no significant relationship with the values of the variable at neighboring locations \(j\).
 
-- **Alternative Hypothesis (\(H_a\))**: Presence of local spatial autocorrelation at location \(i\) (\(I_i \neq 0\)).  
-  - This means that the values at location \(i\) are either very similar to those at neighboring locations (indicating **positive spatial autocorrelation**) or significantly different from nearby values (indicating **negative spatial autocorrelation**).  
+- **Alternative Hypothesis (\(H_a\))**: Presence of local spatial autocorrelation at location \(i\) (\(I_i \neq 0\)).
+  - This means that the values at location \(i\) are either very similar to those at neighboring locations (indicating **positive spatial autocorrelation**) or significantly different from nearby values (indicating **negative spatial autocorrelation**).
 
 
 Significance tests for local Moran’s I are conducted using **random shuffling** to ensure that detected clusters are not merely due to random chance. This process follows the same approach as global Moran’s I but involves randomly reshuffling the values of the variable across the study area while **keeping the value at location \(i\) constant**. By comparing the observed local Moran’s I to the distribution of values from these random permutations, statistical significance can be assessed.
@@ -131,7 +131,7 @@ To analyze the relationship between socioeconomic factors and median house value
 
 - **Linearity** assumes that the relationship between the dependent variable and the predictors is linear. To verify this assumption, we made scatter plots of the dependent variable against each predictor. If the relationship appears to be linear, the assumptions was met.
 
--  **Independence of Observations** assumes that the observations are independent of each other. There should be no spatial or temporal or other forms of dependence in the data. 
+-  **Independence of Observations** assumes that the observations are independent of each other. There should be no spatial or temporal or other forms of dependence in the data.
 
 - **Homoscedasticity** assumes that the variance of the residuals \(\epsilon\) is constant regardless of the values of each level of the predictors. To check this assumption, we made a scatter plot of the standardized residuals against the predicted values. If the residuals are evenly spread around zero, the assumption was met. Any patterns may indicate the presence of heteroscedasticity.
 
@@ -147,7 +147,7 @@ Furthermore, when data has a spatial component, the assumption of **normality of
 
 ### Test for Sparial Autocorrelation
 
-To test this assumption, spatial autocorrelation of the residuals can be examined using **Moran’s I**, which measures whether residuals are clustered, dispersed, or randomly distributed in space. As mentioned in before, it is first extract the residuals and define a spatial weights matrix (e.g., Queen or Rook contiguity). Then, Moran’s I is computed to measure the degree of clustering in residuals, with values close to +1 indicating positive spatial autocorrelation, -1 indicating negative autocorrelation, and 0 suggesting randomness. 
+To test this assumption, spatial autocorrelation of the residuals can be examined using **Moran’s I**, which measures whether residuals are clustered, dispersed, or randomly distributed in space. As mentioned in before, it is first extract the residuals and define a spatial weights matrix (e.g., Queen or Rook contiguity). Then, Moran’s I is computed to measure the degree of clustering in residuals, with values close to +1 indicating positive spatial autocorrelation, -1 indicating negative autocorrelation, and 0 suggesting randomness.
 
 Another method to test for spatial autocorrelation in OLS residuals is to **regress them on the residuals from nearby observations**. In this report, nearby residuals refer to residuals from neighboring block groups, as defined by the Queen matrix. The regression line between the residuals, `OLS_RESIDU` and `WT_RESIDU` (weighted residuals from neighboring groups), help identify any spatial autocorrelation. The **slope (b)** of this regression represents the strength of spatial dependence. It is calculated by estimating the relationship between the residuals of one observation and those of its neighbors.
 
@@ -161,19 +161,19 @@ As we use R for analysis, it also provide methods for testing other regression a
 
 One is **Homoscedasticity**, assuming that the variance of the errors (residuals) remains constant across all levels of the independent variables. In R, tests such as the **Breusch-Pagan Test**, **Koenker-Bassett Test**(also known as the Studentized Breusch-Pagan Test) or **White Test** are used to detect heteroscedasticity.
 
-- **Null hypothesis (H₀):** The errors have constant variance (homoscedasticity).  
-- **Alternative hypothesis (H₁):** The errors have non-constant variance (heteroscedasticity).  
+- **Null hypothesis (H₀):** The errors have constant variance (homoscedasticity).
+- **Alternative hypothesis (H₁):** The errors have non-constant variance (heteroscedasticity).
 
 If the p-value is less than 0.05, then we can reject the null hypothesis for the alternate hypothesis of
-heteroscedasticity.  
+heteroscedasticity.
 
 Another is **Normality of Errors**, assuming that residuals follow a normal distribution—a crucial requirement for valid hypothesis testing and confidence intervals. In R, tests such as the **Jarque-Bera Test ** can be used.
 
-- **Null hypothesis (H₀):** The residuals follow a normal distribution.  
-- **Alternative hypothesis (H₁):** The residuals do not follow a normal distribution.  
+- **Null hypothesis (H₀):** The residuals follow a normal distribution.
+- **Alternative hypothesis (H₁):** The residuals do not follow a normal distribution.
 
 The p-value determines whether the residuals follow a normal distribution. If the p-value is less than 0.05, then we can reject the Null Hypothesis of normality for the alternative
-hypothesis of non-normality. 
+hypothesis of non-normality.
 
 
 ## Spatial Lag and Spatial Error Regression
@@ -186,12 +186,12 @@ hypothesis of non-normality.
 
 # Results
 
-## Spatial Autocorrelation 
+## Spatial Autocorrelation
 
-## A Review of OLS Regression and Assumptions: Results 
+## A Review of OLS Regression and Assumptions: Results
 
 
-## Spatial Lag and Spatial Error Regression Results 
+## Spatial Lag and Spatial Error Regression Results
 
 
 ## Geographically Weighted Regression Results、
@@ -207,15 +207,15 @@ data<-data%>%
 ```
 
 ```{r}
-# b. Create a Queen weight file 
-queen <- poly2nb(data, row.names=data$POLY_I) 
+# b. Create a Queen weight file
+queen <- poly2nb(data, row.names=data$POLY_I)
 summary(queen)
 ```
 
 ```{r}
 # c. Global Moran's I for LNMEHVAL
 queenlist<-nb2listw(queen, style = 'W')
-moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I` 
+moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I`
 ```
 
 ```{r}
@@ -229,13 +229,13 @@ moranMC
 moranMCres<-moranMC$res
 hist(moranMCres, freq=10000000, nclass=100)   #Draws distribution of Moran's I's calculated from randomly permuted values
 # Here, we draw a red vertical line at the observed value of our Moran's I
-abline(v=moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I`, col='red')  
+abline(v=moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I`, col='red')
 
 ```
 
 ```{r}
 # plot scatter
-moran.plot(data$LNMEDHVAL, queenlist) 
+moran.plot(data$LNMEDHVAL, queenlist)
 ```
 
 
@@ -256,7 +256,7 @@ tmap_mode("plot")
 #Obtaining the Local Moran's P-Values (two-sided)
 data$lmp <- lmoran[, "Pr(z != E(Ii))"]
 
-data <- st_make_valid(data) 
+data <- st_make_valid(data)
 
 
 #Creating the LISA Clusters
@@ -325,12 +325,12 @@ summary(reg)
 ```
 
 ```{r}
-# g.  OLS residuals plotted 
+# g.  OLS residuals plotted
 data$OLS_RESIDU<-rstandard(reg)
 data$WT_RESIDU<-sapply(queen, function(x) mean(data$OLS_RESIDU[x]))
 
 OLS.Residuals.Map<-tm_shape(data)+
-  tm_fill(col='OLS_RESIDU', style='quantile', title='Standardized OLS Residuals', 
+  tm_fill(col='OLS_RESIDU', style='quantile', title='Standardized OLS Residuals',
           palette ='Blues')+
   tm_layout(frame=FALSE, title = 'Standardised OLS Residuals')
 OLS.Residuals.Map
@@ -342,8 +342,8 @@ OLS.Residuals.Map
 ggplot(data, aes(x = WT_RESIDU, y = OLS_RESIDU)) +
   geom_point(color = "blue", alpha = 0.6) +
   geom_smooth(method = "lm", se = FALSE, color = "red") +
-  labs(title = "Scatter Plot of OLS Residuals vs. Weighted Residuals", 
-       x = "Weighted Residuals (WT_RESIDU)", 
+  labs(title = "Scatter Plot of OLS Residuals vs. Weighted Residuals",
+       x = "Weighted Residuals (WT_RESIDU)",
        y = "OLS Residuals (OLS_RESIDU)") +
   theme_minimal()
 

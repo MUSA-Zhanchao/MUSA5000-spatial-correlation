@@ -1440,34 +1440,34 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ef2929; } 
-code span.an { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.at { color: #204a87; } 
-code span.bn { color: #0000cf; } 
-code span.cf { color: #204a87; font-weight: bold; } 
-code span.ch { color: #4e9a06; } 
-code span.cn { color: #8f5902; } 
-code span.co { color: #8f5902; font-style: italic; } 
-code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.do { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.dt { color: #204a87; } 
-code span.dv { color: #0000cf; } 
-code span.er { color: #a40000; font-weight: bold; } 
-code span.ex { } 
-code span.fl { color: #0000cf; } 
-code span.fu { color: #204a87; font-weight: bold; } 
-code span.im { } 
-code span.in { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.kw { color: #204a87; font-weight: bold; } 
-code span.op { color: #ce5c00; font-weight: bold; } 
-code span.ot { color: #8f5902; } 
-code span.pp { color: #8f5902; font-style: italic; } 
-code span.sc { color: #ce5c00; font-weight: bold; } 
-code span.ss { color: #4e9a06; } 
-code span.st { color: #4e9a06; } 
-code span.va { color: #000000; } 
-code span.vs { color: #4e9a06; } 
-code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } 
+code span.al { color: #ef2929; }
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; }
+code span.at { color: #204a87; }
+code span.bn { color: #0000cf; }
+code span.cf { color: #204a87; font-weight: bold; }
+code span.ch { color: #4e9a06; }
+code span.cn { color: #8f5902; }
+code span.co { color: #8f5902; font-style: italic; }
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; }
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; }
+code span.dt { color: #204a87; }
+code span.dv { color: #0000cf; }
+code span.er { color: #a40000; font-weight: bold; }
+code span.ex { }
+code span.fl { color: #0000cf; }
+code span.fu { color: #204a87; font-weight: bold; }
+code span.im { }
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; }
+code span.kw { color: #204a87; font-weight: bold; }
+code span.op { color: #ce5c00; font-weight: bold; }
+code span.ot { color: #8f5902; }
+code span.pp { color: #8f5902; font-style: italic; }
+code span.sc { color: #ce5c00; font-weight: bold; }
+code span.ss { color: #4e9a06; }
+code span.st { color: #4e9a06; }
+code span.va { color: #000000; }
+code span.vs { color: #4e9a06; }
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 .sourceCode .row {
 width: 100%;
 }
@@ -2017,15 +2017,15 @@ non-normality.</p>
 ## if this sub-graph count seems unexpected, try increasing the snap argument.</code></pre>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">summary</span>(queen)</span></code></pre></div>
 <pre><code>## Neighbour list object:
-## Number of regions: 1720 
-## Number of nonzero links: 10526 
-## Percentage nonzero weights: 0.3558004 
-## Average number of links: 6.119767 
+## Number of regions: 1720
+## Number of nonzero links: 10526
+## Percentage nonzero weights: 0.3558004
+## Average number of links: 6.119767
 ## 2 disjoint connected subgraphs
 ## Link number distribution:
-## 
-##   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  18  27 
-##   4  16  52 175 348 493 344 177  62  28  10   4   2   1   1   1   1   1 
+##
+##   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  18  27
+##   4  16  52 175 348 493 344 177  62  28  10   4   2   1   1   1   1   1
 ## 4 least connected regions:
 ## 441 708 1391 1665 with 1 link
 ## 1 most connected region:
@@ -2037,13 +2037,13 @@ non-normality.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Perform 999 permutation tests</span></span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>moranMC<span class="ot">&lt;-</span><span class="fu">moran.mc</span>(data<span class="sc">$</span>LNMEDHVAL, queenlist, <span class="at">nsim=</span><span class="dv">999</span>, <span class="at">alternative=</span><span class="st">&quot;two.sided&quot;</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>moranMC</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Monte-Carlo simulation of Moran I
-## 
-## data:  data$LNMEDHVAL 
-## weights: queenlist  
-## number of simulations + 1: 1000 
-## 
+##
+## data:  data$LNMEDHVAL
+## weights: queenlist
+## number of simulations + 1: 1000
+##
 ## statistic = 0.79356, observed rank = 1000, p-value &lt; 2.2e-16
 ## alternative hypothesis: two.sided</code></pre>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># plot histogram</span></span>
@@ -2153,17 +2153,17 @@ non-normality.</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="co"># e. OLS Regression Analysis</span></span>
 <span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>reg<span class="ot">&lt;-</span><span class="fu">lm</span>(LNMEDHVAL <span class="sc">~</span> LNNBELPOV<span class="sc">+</span>PCTBACHMOR<span class="sc">+</span>PCTSINGLES<span class="sc">+</span>PCTVACANT, <span class="at">data=</span>data)</span>
 <span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a><span class="fu">summary</span>(reg)</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ## Call:
-## lm(formula = LNMEDHVAL ~ LNNBELPOV + PCTBACHMOR + PCTSINGLES + 
+## lm(formula = LNMEDHVAL ~ LNNBELPOV + PCTBACHMOR + PCTSINGLES +
 ##     PCTVACANT, data = data)
-## 
+##
 ## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -2.25817 -0.20391  0.03822  0.21743  2.24345 
-## 
+##      Min       1Q   Median       3Q      Max
+## -2.25817 -0.20391  0.03822  0.21743  2.24345
+##
 ## Coefficients:
-##               Estimate Std. Error t value Pr(&gt;|t|)    
+##               Estimate Std. Error t value Pr(&gt;|t|)
 ## (Intercept) 11.1137781  0.0465318 238.843  &lt; 2e-16 ***
 ## LNNBELPOV   -0.0789035  0.0084567  -9.330  &lt; 2e-16 ***
 ## PCTBACHMOR   0.0209095  0.0005432  38.494  &lt; 2e-16 ***
@@ -2171,9 +2171,9 @@ non-normality.</p>
 ## PCTVACANT   -0.0191563  0.0009779 -19.590  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
+##
 ## Residual standard error: 0.3665 on 1715 degrees of freedom
-## Multiple R-squared:  0.6623, Adjusted R-squared:  0.6615 
+## Multiple R-squared:  0.6623, Adjusted R-squared:  0.6615
 ## F-statistic: 840.9 on 4 and 1715 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="co"># g.  OLS residuals plotted </span></span>
 <span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>data<span class="sc">$</span>OLS_RESIDU<span class="ot">&lt;-</span><span class="fu">rstandard</span>(reg)</span>
@@ -2211,55 +2211,55 @@ non-normality.</p>
 <div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a><span class="co"># Run simple regression of OLS_RESIDU on WT_RESIDU</span></span>
 <span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a>lm_residuals <span class="ot">&lt;-</span> <span class="fu">lm</span>(OLS_RESIDU <span class="sc">~</span> WT_RESIDU, <span class="at">data =</span> data)</span>
 <span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a><span class="fu">summary</span>(lm_residuals)</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ## Call:
 ## lm(formula = OLS_RESIDU ~ WT_RESIDU, data = data)
-## 
+##
 ## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -5.3685 -0.4450  0.0585  0.4618  5.4435 
-## 
+##     Min      1Q  Median      3Q     Max
+## -5.3685 -0.4450  0.0585  0.4618  5.4435
+##
 ## Coefficients:
-##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept) -0.01281    0.02121  -0.604    0.546    
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) -0.01281    0.02121  -0.604    0.546
 ## WT_RESIDU    0.73235    0.03244  22.576   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
+##
 ## Residual standard error: 0.8793 on 1718 degrees of freedom
-## Multiple R-squared:  0.2288, Adjusted R-squared:  0.2283 
+## Multiple R-squared:  0.2288, Adjusted R-squared:  0.2283
 ## F-statistic: 509.7 on 1 and 1718 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a><span class="co"># h. Moran’s I of the OLS regression residuals</span></span>
 <span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a></span>
 <span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a><span class="co">#Regressing residuals on their nearest neighbors.</span></span>
 <span id="cb41-4"><a href="#cb41-4" tabindex="-1"></a>res.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula=</span>data<span class="sc">$</span>OLS_RESIDU <span class="sc">~</span> data<span class="sc">$</span>WT_RESIDU)</span>
 <span id="cb41-5"><a href="#cb41-5" tabindex="-1"></a><span class="fu">summary</span>(res.lm)</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ## Call:
 ## lm(formula = data$OLS_RESIDU ~ data$WT_RESIDU)
-## 
+##
 ## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -5.3685 -0.4450  0.0585  0.4618  5.4435 
-## 
+##     Min      1Q  Median      3Q     Max
+## -5.3685 -0.4450  0.0585  0.4618  5.4435
+##
 ## Coefficients:
-##                Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)    -0.01281    0.02121  -0.604    0.546    
+##                Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)    -0.01281    0.02121  -0.604    0.546
 ## data$WT_RESIDU  0.73235    0.03244  22.576   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
+##
 ## Residual standard error: 0.8793 on 1718 degrees of freedom
-## Multiple R-squared:  0.2288, Adjusted R-squared:  0.2283 
+## Multiple R-squared:  0.2288, Adjusted R-squared:  0.2283
 ## F-statistic: 509.7 on 1 and 1718 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="fu">moran.mc</span>(data<span class="sc">$</span>OLS_RESIDU, queenlist, <span class="dv">999</span>, <span class="at">alternative=</span><span class="st">&quot;two.sided&quot;</span>)</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Monte-Carlo simulation of Moran I
-## 
-## data:  data$OLS_RESIDU 
-## weights: queenlist  
-## number of simulations + 1: 1000 
-## 
+##
+## data:  data$OLS_RESIDU
+## weights: queenlist
+## number of simulations + 1: 1000
+##
 ## statistic = 0.3124, observed rank = 1000, p-value &lt; 2.2e-16
 ## alternative hypothesis: two.sided</code></pre>
 <div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a><span class="fu">moran.plot</span>(data<span class="sc">$</span>OLS_RESIDU, queenlist)</span></code></pre></div>
