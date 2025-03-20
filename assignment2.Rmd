@@ -368,8 +368,3 @@ moran.mc(data$OLS_RESIDU, queenlist, 999, alternative="two.sided")
 ```{r}
 moran.plot(data$OLS_RESIDU, queenlist)
 ```
-
-
-
-
-
