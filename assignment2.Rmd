@@ -16,6 +16,8 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(scipen=999)
+options(digits = 3)
 
 library(tidyverse)
 library(sf)
@@ -46,6 +48,14 @@ data<-st_read("data/RegressionData.shp")
 ```
 
 # Introduction
+
+Philadelphia has experienced significant demographic and economic transformations over recent decades, leading to notable implications for its urban housing market. These shifts have resulted in variations in median house values, which serve not only as a reflection of the city’s economic health but also as a proxy for broader social and spatial dynamics. Increasing median house values may indicate an influx of higher-income residents or early stages of gentrification, whereas declining values can be symptomatic of disinvestment and economic decline. Given these dynamics, accurately forecasting median house values is vital for urban planners and policymakers who are tasked with promoting sustainable and equitable urban development.
+
+In our previous study, Ordinary Least Squares (OLS) regression was used to explore the relationships between median house values, the dependent variable, and several key socio-economic predictors in Philadelphia. These predictors included educational attainment, vacancy rates, the proportion of detached single-family homes, and poverty rate. All these factors influenced the homes price in different ways.
+
+Although OLS regression provides a foundational understanding of the relationships between the predictors and the dependent variables, it has limitations when applied to spatial data. One of the key assumptions of OLS regression is that observations are independent of each other and without spatial autocorrelation. However, in spatial data, observations that are geographically close often exhibit similarity, leading to spatial autocorrelation and violating the assumption of the OLS. Violate the assumptions of OLS may lead to biased and inefficient estimates of the regression coefficients, and incorrect inferences about the relationships between the predictors and the dependent variable.
+
+To address these limitations, this report employs advanced spatial regression techniques to predict median house values in Philadelphia. We use **Spatial Lag Regression**, **Spatial Error Regression**, and **Geographically Weighted Regression (GWR)** to account for spatial autocorrelation and spatial heterogeneity in the data. We examine whether those spatial regression model could accurate predict the homes price than the Ordinary Least Squares (OLS) regression models. By utilizing these spatial techniques, this study aims to improve the accuracy of the initial OLS findings and provide a more comprehensive understanding of the socio-economic and spatial factors influencing housing values. These insights will support more effective policy interventions and urban development strategies aimed at achieving equitable and sustainable growth in Philadelphia.
 
 # Methods
 
@@ -206,36 +216,53 @@ data<-data%>%
   mutate(LNNBELPOV100 = log(1+NBelPov100))
 ```
 
-```{r}
-# b. Create a Queen weight file
-queen <- poly2nb(data, row.names=data$POLY_I)
-summary(queen)
-```
+```{r construct queen neighbors, message=FALSE, warning=FALSE, include=FALSE}
 
-```{r}
-# c. Global Moran's I for LNMEHVAL
+queen<-poly2nb(data, row.names=data$POLY_ID)
 queenlist<-nb2listw(queen, style = 'W')
-moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I`
-```
-
-```{r}
-# Perform 999 permutation tests
-moranMC<-moran.mc(data$LNMEDHVAL, queenlist, nsim=999, alternative="two.sided")
-moranMC
-```
-
-```{r}
-# plot histogram
-moranMCres<-moranMC$res
-hist(moranMCres, freq=10000000, nclass=100)   #Draws distribution of Moran's I's calculated from randomly permuted values
-# Here, we draw a red vertical line at the observed value of our Moran's I
-abline(v=moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I`, col='red')
 
 ```
 
-```{r}
-# plot scatter
-moran.plot(data$LNMEDHVAL, queenlist)
+
+```{r global moran I, message=FALSE, warning=FALSE}
+
+globalmoranMC<-moran.mc(data$LNMEDHVAL, queenlist, nsim=999, alternative="two.sided")
+globalmoranMC
+```
+
+```{r global moran histogram plot, message=FALSE, warning=FALSE}
+
+ggplot(data.frame(res = globalmoranMC$res), aes(x = res)) +
+  geom_histogram(bins = 100, fill = "#283d3b") +
+  geom_vline(xintercept = globalmoranMC$statistic, color = "#c44536", linetype = 'dashed', size = 1) +
+  labs(title = "Observed and Permuted Global Moran's I",
+       subtitle = "Observed Moran's I in Red",
+       x = "Moran's I",
+       y = "Count") +
+  theme_light() +
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6),
+        axis.title=element_text(size=8))
+
+```
+
+```{r global moran scatter plot, message=FALSE, warning=FALSE}
+data <- data.frame( LNMEDHVAL = data$LNMEDHVAL, spatial_lag = lag.listw(queenlist, data$LNMEDHVAL))
+
+ggplot(data, aes(x = LNMEDHVAL, y = spatial_lag)) +
+  geom_point(color = "#283d3b", alpha = 0.7, size = 0.6) +
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +
+  labs(title = "Global Moran's I Scatter Plot",
+       x = "Logged Median House Value",
+       y = "Spatial Lag of LNMEDHVAL") +
+  theme_light() +
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6),
+        axis.title=element_text(size=8))
 ```
 
 
