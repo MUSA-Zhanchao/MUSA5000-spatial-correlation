@@ -71,7 +71,7 @@ This principle suggests that geographically proximate areas tend to exhibit simi
 
 Spatial autocorrelation measures how much a variable in one location is influenced by values in nearby locations. If observations that are closer to each other in space have related values, spatial autocorrelation will be **positive**. While if observations that are closer to each other have markedly different values, spatial autocorrelation will be **negative**.
 
-### Moran’s I: Measuring Spatial Autocorrelation
+### Moran’s I
 
 **Moran’s I** is a widely used method for measuring spatial autocorrelation. The formula for Moran’s I is:
 
@@ -89,7 +89,7 @@ where:
 
 A **Moran’s I** value close to **+1** indicates strong positive spatial autocorrelation (clusters of similar values). A value near **-1** suggests strong negative spatial autocorrelation (dispersion). A value near **0** implies no spatial autocorrelation.
 
-### Weight Matrix: Defining Spatial Relationships
+### Spatial Weight Matrix
 
 When dealing with spatial data, we use **spatial weight matrices** to define relationships between observations. Given \( n \) observations, we construct an \( n \times n \) matrix that summarizes all pairwise spatial relationships in the dataset. These matrices are essential for estimating spatial regression models and calculating spatial autocorrelation indices.
 
@@ -99,7 +99,7 @@ In this report, we use the **Queen contiguity weight matrix**, which considers a
 
 Although we only use the queen contiguity weight matrix in the report, statisticians always use multiple spatial weight matrices to check the robustness of the results. Since different spatial weights can capture spatial dependencies at various levels of granularity, it can make sure the results are not merely an artifact of the matrix you’re using.
 
-### Hypothesis: Spatial Autocorrelation Significance Tests
+### Hypothesis for Spatial Autocorrelation Significance Tests
 
 To determine whether spatial autocorrelation is statistically significant, we conduct a hypothesis test:
 
@@ -139,25 +139,28 @@ If the observed \(I_i\) is extremely high or low compared to the reshuffled valu
 
 To analyze the relationship between socioeconomic factors and median house values in Philadelphia, we often use OLS (Ordinary Least Squares) Regression. By examining these relationships, we aim to identify critical predictors of median housing values throughout Philadelphia and offer insights for decision-makers and community initiatives. The key assumptions of OLS regression include:
 
-- **Linearity** assumes that the relationship between the dependent variable and the predictors is linear. To verify this assumption, we made scatter plots of the dependent variable against each predictor. If the relationship appears to be linear, the assumptions was met.
+- **Linearity** assumes that the relationship between the dependent variable and the predictors is linear.
 
 -  **Independence of Observations** assumes that the observations are independent of each other. There should be no spatial or temporal or other forms of dependence in the data.
 
-- **Homoscedasticity** assumes that the variance of the residuals \(\epsilon\) is constant regardless of the values of each level of the predictors. To check this assumption, we made a scatter plot of the standardized residuals against the predicted values. If the residuals are evenly spread around zero, the assumption was met. Any patterns may indicate the presence of heteroscedasticity.
+- **Homoscedasticity** assumes that the variance of the residuals \(\epsilon\) is constant regardless of the values of each level of the predictors.
 
-- **Normality of Residuals** assumes that the residuals are normally distributed. We examined the histogram of the standardized residuals to check if they are approximately normally distributed. If the histogram is bell-shaped, the assumption was met.
+- **Normality of Residuals** assumes that the residuals are normally distributed.
 
-- **No Multicollinearity** assumes that the predictors are not highly correlated with each other. We calculated the correlation matrix of the predictors to check for multicollinearity. If the correlation coefficients are is not greater than 0.8 or less than -0.8, the assumption was met.
+- **No Multicollinearity** assumes that the predictors are not highly correlated with each other.
 
-- **No Fewer than 10 Observations per Predictor** assumes that there are at least 10 observations for each predictor in the model. Since there are over 1,700 observations in the dataset, this assumption was met.
+- **No Fewer than 10 Observations per Predictor** assumes that there are at least 10 observations for each predictor in the model.
 
-A vital assumption of OLS regression is that **observations are independent of each other**. However, in spatial data, observations that are geographically close often exhibit similarity, leading to spatial autocorrelation and violating the independence assumption. When spatial autocorrelation is present, values of a variable in nearby areas are related rather than randomly distributed.
+In our first assignment, we used OLS regression to access how vacancy rates, single-family housing percentage, educational attainment, and poverty rates influence median house values in Philadelphia. All predictors were statistically significant. The model's R-squared was 0.66, which indicate the model explain 66% of the variance in house values.
 
-Furthermore, when data has a spatial component, the assumption of **normality of residuals** often—but not necessarily—fails to hold. In some cases, spatial autocorrelation does not significantly impact regression analysis. If the dependent variable exhibits strong spatial autocorrelation while the error term does not, the regression coefficients and significance levels remain valid. Additionally, if both the dependent and independent variables share an identical spatial pattern, and the spatial dependencies in the dependent variable are fully explained by those in the independent variable, the residuals may be spatially independent. However, this is not always the case, and **it is essential to test for spatial autocorrelation in residuals to ensure the validity of the model**.
+However, some predictors exhibited non-linear patterns, and spatial autocorrelation suggested dependence among observations. For OLS regression, one of the vital assumptions of OLS regression is that **observations are independent of each other**. In spatial data, observations that are geographically close often exhibit similarity, leading to spatial autocorrelation and violating the independence assumption. When spatial autocorrelation is present, values of a variable in nearby areas are related rather than randomly distributed. We need further test the spatial autocorrelation and key assumptions of OLS regression in order to improve the model's accuracy and reliability.
+
+Furthermore, when data has a spatial component, the assumption of **normality of residuals** often fails to hold. In some cases, spatial autocorrelation does not significantly impact regression analysis. If the dependent variable exhibits strong spatial autocorrelation while the error term does not, the regression coefficients and significance levels remain valid. Additionally, if both the dependent and independent variables share an identical spatial pattern, and the spatial dependencies in the dependent variable are fully explained by those in the independent variable, the residuals may be spatially independent. However, this is not always the case, and **it is essential to test for spatial autocorrelation in residuals to ensure the validity of the model**.
+
 
 ### Test for Sparial Autocorrelation
 
-To test this assumption, spatial autocorrelation of the residuals can be examined using **Moran’s I**, which measures whether residuals are clustered, dispersed, or randomly distributed in space. As mentioned in before, it is first extract the residuals and define a spatial weights matrix (e.g., Queen or Rook contiguity). Then, Moran’s I is computed to measure the degree of clustering in residuals, with values close to +1 indicating positive spatial autocorrelation, -1 indicating negative autocorrelation, and 0 suggesting randomness.
+To test this assumption, spatial autocorrelation of the residuals can be examined using **Moran’s I**, which measures whether residuals are clustered, dispersed, or randomly distributed in space. As mentioned before, it is first extract the residuals and define a spatial weights matrix (e.g., Queen or Rook contiguity). Then, Moran’s I is computed to measure the degree of clustering in residuals, with values close to +1 indicating positive spatial autocorrelation, -1 indicating negative autocorrelation, and 0 suggesting randomness.
 
 Another method to test for spatial autocorrelation in OLS residuals is to **regress them on the residuals from nearby observations**. In this report, nearby residuals refer to residuals from neighboring block groups, as defined by the Queen matrix. The regression line between the residuals, `OLS_RESIDU` and `WT_RESIDU` (weighted residuals from neighboring groups), help identify any spatial autocorrelation. The **slope (b)** of this regression represents the strength of spatial dependence. It is calculated by estimating the relationship between the residuals of one observation and those of its neighbors.
 
@@ -165,11 +168,11 @@ Another method to test for spatial autocorrelation in OLS residuals is to **regr
 - If **b<0**, there is negative spatial autocorrelation, meaning areas with high residuals are surrounded by areas with low residuals (and vice versa).
 - If **b≈0**, there is no spatial autocorrelation, suggesting that the residuals are randomly distributed.
 
-### Other regression assumptions
+### Assumptions Test
 
-As we use R for analysis, it also provide methods for testing other regression assumptions.
+In R, there are methods to test other key assumption as well. We will continue using R for the analysis.
 
-One is **Homoscedasticity**, assuming that the variance of the errors (residuals) remains constant across all levels of the independent variables. In R, tests such as the **Breusch-Pagan Test**, **Koenker-Bassett Test**(also known as the Studentized Breusch-Pagan Test) or **White Test** are used to detect heteroscedasticity.
+Another key assumption is **Homoscedasticity**, which aassume that the variance of the errors (residuals) remains constant across all levels of the independent variables. In R, we used  **Breusch-Pagan Test**, **Koenker-Bassett Test**(also known as the Studentized Breusch-Pagan Test). and **White Test**  to detect heteroscedasticity.
 
 - **Null hypothesis (H₀):** The errors have constant variance (homoscedasticity).
 - **Alternative hypothesis (H₁):** The errors have non-constant variance (heteroscedasticity).
@@ -177,17 +180,31 @@ One is **Homoscedasticity**, assuming that the variance of the errors (residuals
 If the p-value is less than 0.05, then we can reject the null hypothesis for the alternate hypothesis of
 heteroscedasticity.
 
-Another is **Normality of Errors**, assuming that residuals follow a normal distribution—a crucial requirement for valid hypothesis testing and confidence intervals. In R, tests such as the **Jarque-Bera Test ** can be used.
+Another assumption is **Normality of Errors**, which assumes that residuals follow a normal distribution—a crucial requirement for valid hypothesis testing and confidence intervals. In R, we used **Jarque-Bera Test **.
 
 - **Null hypothesis (H₀):** The residuals follow a normal distribution.
 - **Alternative hypothesis (H₁):** The residuals do not follow a normal distribution.
 
-The p-value determines whether the residuals follow a normal distribution. If the p-value is less than 0.05, then we can reject the Null Hypothesis of normality for the alternative
-hypothesis of non-normality.
+The p-value determines whether the residuals follow a normal distribution. If the p-value is less than 0.05, then we can reject the Null Hypothesis of normality for the alternative hypothesis of non-normality.
 
 
 ## Spatial Lag and Spatial Error Regression
 
+In this report, we also use R to run spatial lag and spatial error regressions. Spatial lag regression assumes the value of the dependent variable at one location is associated with the values of that variable in nearby locations, defined by weights matrix \(W\), whether rook, queen neighbors, or within certain distance of one another. In our context, the spatial lag model is defined as follows:
+
+$$
+\text{LNMEDHVAL} = \rho W \cdot \text{LNMEDHVAL} + \beta_0 + \beta_1 \cdot \text{PCTVACANT} + \beta_2 \cdot \text{PCTSINGLES} + \beta_3 \cdot \text{PCTBACHMOR} + \beta_4 \cdot \text{LNNBELPOV100} + \epsilon_i
+$$
+where:
+- \(\text{LNMEDHVAL}\) is the logged median house value,
+-$\rho$ is the spatial autoregressive coefficient, which measures the influence of neighboring areas on the median house value,
+- \(W\) is the spatial weights matrix (in this case, the Queen spatial matrix),
+-$W \cdot \text{LNMEDHVAL}$ is the spatially lagged dependent variable (house price),
+
+The other term are same as in the OLS regression model, where:
+- \(\beta_0\) is the intercept,
+- \(\beta_1\), \(\beta_2\), \(\beta_3\), and \(\beta_4\) are the coefficients of the predictors,
+- \(\epsilon_i\) is the error term.
 
 ## Geographically Weighted Regression
 
