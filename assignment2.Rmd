@@ -59,7 +59,7 @@ To address these limitations, this report employs advanced spatial regression te
 
 # Methods
 
-## A Description of the Concept of Spatial Autocorrelation
+## Concept of Spatial Autocorrelation
 
 ### The First Law of Geography
 
@@ -99,7 +99,7 @@ In this report, we use the **Queen contiguity weight matrix**, which considers a
 
 Although we only use the queen contiguity weight matrix in the report, statisticians always use multiple spatial weight matrices to check the robustness of the results. Since different spatial weights can capture spatial dependencies at various levels of granularity, it can make sure the results are not merely an artifact of the matrix you’re using.
 
-### Hypothesis for Spatial Autocorrelation Significance Tests
+### Hypothesis Tests for Spatial Autocorrelation 
 
 To determine whether spatial autocorrelation is statistically significant, we conduct a hypothesis test:
 
@@ -133,7 +133,7 @@ Significance tests for local Moran’s I are conducted using **random shuffling*
 If the observed \(I_i\) is extremely high or low compared to the reshuffled values, it is considered significant. The **pseudosignificance value** is estimated by noting the rank of the actual \(I_i\) among the permutations. For instance, if the original \(I_i\) ranks as the 97th highest among 999 permutations, the estimated pseudosignificance is **\(p \approx 0.097\)**.
 
 
-## A Review of OLS Regression and Assumptions
+## Reviews of OLS Regression and Assumptions
 
 ### Limitation of OLS Regression
 
@@ -207,6 +207,44 @@ The other term are same as in the OLS regression model, where:
 - \(\beta_0\) is the intercept,
 - \(\beta_1\), \(\beta_2\), \(\beta_3\), and \(\beta_4\) are the coefficients of the predictors,
 - \(\epsilon_i\) is the error term.
+
+The spatial error model, on the other hand, assumes that the residuals of the model are spatially autocorrelated.It assumes that the residual in one location is associated with residuals at nearby locations defined by the spatial weights matrix \(W\), in this case the queen spatial matrix. The spatial error model is defined as follows:
+
+$$
+\text{LNMEDHVAL} = \beta_0 + \beta_1 \times \text{PCTVACANT} + \beta_2 \times \text{PCTSINGLES} + \beta_3 \times \text{PCTBACHMOR} + \beta_4 \times \text{LNNBELPOV100} + \lambda W \times \epsilon + u
+$$
+
+where:
+
+- \(\lambda\) is the spatial error coefficient which measure the degree of spatial correlation in the error term,
+- \(W\) is the spatial weights matrix (in this case, the Queen spatial matrix),
+- \(W \times \epsilon\) is the spatially lagged error term,
+- \( u \) is the random noise term.
+
+The other term is the same as in the OLS regression model, where:
+
+- \(\text{LNMEDHVAL}\) is the logged transformed  median house value,
+- \(\beta_0\) is the intercept,
+- \(\beta_1\), \(\beta_2\), \(\beta_3\), and \(\beta_4\) are the coefficients of the predictors.
+
+Both spatial error regression and spatial lag regression require standard assumptions of OLS regression, including linerarity, homoscedasticity, and normality of residuals, excepty for the assumptions of spatial independence among observations. This adjustment allows the model to account for spatial autocorrelation and spatial heterogeneity in the data through either the dependent variable (spatial lag model) or the error term (spatial error model). These two models minimize spatial patterns in residuals that could lead to biased and inefficient estimates.
+
+We compare the results of spatial lag and spatial error regression with the OLS regression to decide whether the two spatial models perform better than OLS regression based on several criteria: Akaike Information Criterion (AIC), Schwarz Criterion (SC, also known as Bayesian Information Criterion, BIC), Log likelihood, and likelihood ratio test.
+
+The **Akaike Information Criterion (AIC)** and **Schward Criterion (SC or BIC)** are used to compared the model's goodness of fit. They work by estimating how much information is lost when a model is used to represent reality. Essentially, they balance how accurate the model is against how complicated it is. A lower AIC or SC score means the model does a better job at this balance.
+
+The **Log likelihood** is a measure used in the maximum likelihood for fitting a statistical model to the data and estimating model parameters. Maximum likelihood picks the values of the parameters that make the observed data as likely as possible. The higher the log likelihood, the better the model explains the data.
+
+The **Likelihood Ratio Test** is used to test whether adding a spatial dependence to a model (spatial lag or spatial error model) significantly improves the model's fit compared to the OLS model. For this test:
+
+- The null hypothesis (\(H_0\)) state that the spatial model  does not provide a significant better fit than OLS
+- The alternative hypothesis (\(H_a\)) state that  that spatial model provides a significantly better fit than OLS.
+
+To reject the null hypothesis for the alternative hypothesis that the spatial model provides a significantly better fit than OLS, the **Likelihood Ratio Test** should have a p-value is less than significant level, typically 0.05. Then, we can draw the conclusion whether the spatial model is better than OLS model. If not, the OLS model is adequate. 
+
+*Note: the likelihood ratio test is not used to compare the spatial lag and spatial error model, but to compare the spatial model with the OLS model. The Likelihood Ratio test only work if compared between nested models, meaning that one model is simplified version of other -- complicated model contains all the same parts as the simpler model, plus extra pieces. The spatial lag model and spatial error model is not in that case.*
+
+Alternatively, we can also compare the spatial models to OLS using the Moran's I statistic,which measures the spatial autocorrelation of the residuals. Moran’s I ranges from -1 to 1, where -1 indicates perfect dispersion, 0 indicates no spatial autocorrelation, and 1 indicates perfect correlation. Our goals of using spatial model is to minimize the spatial autocorrelation of the residuals. If the Moran's I of the residuals of the spatial model is closer to 0 than the Moran's I of the residuals of the OLS model, then the spatial model is better at minimizing spatial autocorrelation. We can conclude that the spatial model is better captures the spatial dependencies in the data than the OLS model.
 
 ## Geographically Weighted Regression
 
