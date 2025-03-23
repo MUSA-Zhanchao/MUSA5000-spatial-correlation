@@ -51,7 +51,7 @@ data<-st_read("data/RegressionData.shp")
 
 Philadelphia has experienced significant demographic and economic transformations over recent decades, leading to notable implications for its urban housing market. These shifts have resulted in variations in median house values, which serve not only as a reflection of the city’s economic health but also as a proxy for broader social and spatial dynamics. Increasing median house values may indicate an influx of higher-income residents or early stages of gentrification, whereas declining values can be symptomatic of disinvestment and economic decline. Given these dynamics, accurately forecasting median house values is vital for urban planners and policymakers who are tasked with promoting sustainable and equitable urban development.
 
-In our previous study, Ordinary Least Squares (OLS) regression was used to explore the relationships between median house values, the dependent variable, and several key socio-economic predictors in Philadelphia. These predictors included educational attainment, vacancy rates, the proportion of detached single-family homes, and poverty rate. All these factors influenced the homes price in different ways.
+In our previous study, Ordinary Least Squares (OLS) regression was used to explore the relationships between median house values, the dependent variable, and several key socio-economic predictors in Philadelphia. These predictors included educational attainment, vacancy rates, the proportion of detached single-family homes, and poverty rate. All these factors influenced the homes price in different ways. 
 
 Although OLS regression provides a foundational understanding of the relationships between the predictors and the dependent variables, it has limitations when applied to spatial data. One of the key assumptions of OLS regression is that observations are independent of each other and without spatial autocorrelation. However, in spatial data, observations that are geographically close often exhibit similarity, leading to spatial autocorrelation and violating the assumption of the OLS. Violate the assumptions of OLS may lead to biased and inefficient estimates of the regression coefficients, and incorrect inferences about the relationships between the predictors and the dependent variable.
 
@@ -139,21 +139,21 @@ If the observed \(I_i\) is extremely high or low compared to the reshuffled valu
 
 To analyze the relationship between socioeconomic factors and median house values in Philadelphia, we often use OLS (Ordinary Least Squares) Regression. By examining these relationships, we aim to identify critical predictors of median housing values throughout Philadelphia and offer insights for decision-makers and community initiatives. The key assumptions of OLS regression include:
 
-- **Linearity** assumes that the relationship between the dependent variable and the predictors is linear.
+- **Linearity** assumes that the relationship between the dependent variable and the predictors is linear. 
 
 -  **Independence of Observations** assumes that the observations are independent of each other. There should be no spatial or temporal or other forms of dependence in the data.
 
-- **Homoscedasticity** assumes that the variance of the residuals \(\epsilon\) is constant regardless of the values of each level of the predictors.
+- **Homoscedasticity** assumes that the variance of the residuals \(\epsilon\) is constant regardless of the values of each level of the predictors. 
 
-- **Normality of Residuals** assumes that the residuals are normally distributed.
+- **Normality of Residuals** assumes that the residuals are normally distributed. 
 
-- **No Multicollinearity** assumes that the predictors are not highly correlated with each other.
+- **No Multicollinearity** assumes that the predictors are not highly correlated with each other. 
 
 - **No Fewer than 10 Observations per Predictor** assumes that there are at least 10 observations for each predictor in the model.
 
-In our first assignment, we used OLS regression to access how vacancy rates, single-family housing percentage, educational attainment, and poverty rates influence median house values in Philadelphia. All predictors were statistically significant. The model's R-squared was 0.66, which indicate the model explain 66% of the variance in house values.
+In our first assignment, we used OLS regression to access how vacancy rates, single-family housing percentage, educational attainment, and poverty rates influence median house values in Philadelphia. All predictors were statistically significant. The model's R-squared was 0.66, which indicate the model explain 66% of the variance in house values.  
 
-However, some predictors exhibited non-linear patterns, and spatial autocorrelation suggested dependence among observations. For OLS regression, one of the vital assumptions of OLS regression is that **observations are independent of each other**. In spatial data, observations that are geographically close often exhibit similarity, leading to spatial autocorrelation and violating the independence assumption. When spatial autocorrelation is present, values of a variable in nearby areas are related rather than randomly distributed. We need further test the spatial autocorrelation and key assumptions of OLS regression in order to improve the model's accuracy and reliability.
+However, some predictors exhibited non-linear patterns, and spatial autocorrelation suggested dependence among observations. For OLS regression, one of the vital assumptions of OLS regression is that **observations are independent of each other**. In spatial data, observations that are geographically close often exhibit similarity, leading to spatial autocorrelation and violating the independence assumption. When spatial autocorrelation is present, values of a variable in nearby areas are related rather than randomly distributed. We need further test the spatial autocorrelation and key assumptions of OLS regression in order to improve the model's accuracy and reliability. 
 
 Furthermore, when data has a spatial component, the assumption of **normality of residuals** often fails to hold. In some cases, spatial autocorrelation does not significantly impact regression analysis. If the dependent variable exhibits strong spatial autocorrelation while the error term does not, the regression coefficients and significance levels remain valid. Additionally, if both the dependent and independent variables share an identical spatial pattern, and the spatial dependencies in the dependent variable are fully explained by those in the independent variable, the residuals may be spatially independent. However, this is not always the case, and **it is essential to test for spatial autocorrelation in residuals to ensure the validity of the model**.
 
@@ -193,15 +193,17 @@ The p-value determines whether the residuals follow a normal distribution. If th
 In this report, we also use R to run spatial lag and spatial error regressions. Spatial lag regression assumes the value of the dependent variable at one location is associated with the values of that variable in nearby locations, defined by weights matrix \(W\), whether rook, queen neighbors, or within certain distance of one another. In our context, the spatial lag model is defined as follows:
 
 $$
-\text{LNMEDHVAL} = \rho W \cdot \text{LNMEDHVAL} + \beta_0 + \beta_1 \cdot \text{PCTVACANT} + \beta_2 \cdot \text{PCTSINGLES} + \beta_3 \cdot \text{PCTBACHMOR} + \beta_4 \cdot \text{LNNBELPOV100} + \epsilon_i
+\text{LNMEDHVAL} = \rho W \times \text{LNMEDHVAL} + \beta_0 + \beta_1 \times \text{PCTVACANT} + \beta_2 \times \text{PCTSINGLES} + \beta_3 \times \text{PCTBACHMOR} + \beta_4 \times \text{LNNBELPOV100} + \epsilon_i
 $$
 where:
+
 - \(\text{LNMEDHVAL}\) is the logged median house value,
--$\rho$ is the spatial autoregressive coefficient, which measures the influence of neighboring areas on the median house value,
+- $\rho$ is the spatial autoregressive coefficient, which measures the influence of neighboring areas on the median house value,
 - \(W\) is the spatial weights matrix (in this case, the Queen spatial matrix),
--$W \cdot \text{LNMEDHVAL}$ is the spatially lagged dependent variable (house price),
+- $W \times \text{LNMEDHVAL}$ is the spatially lagged dependent variable (house price),
 
 The other term are same as in the OLS regression model, where:
+
 - \(\beta_0\) is the intercept,
 - \(\beta_1\), \(\beta_2\), \(\beta_3\), and \(\beta_4\) are the coefficients of the predictors,
 - \(\epsilon_i\) is the error term.
@@ -243,7 +245,7 @@ queenlist<-nb2listw(queen, style = 'W')
 
 ```{r global moran I, message=FALSE, warning=FALSE}
 
-globalmoranMC<-moran.mc(data$LNMEDHVAL, queenlist, nsim=999, alternative="two.sided")
+globalmoranMC<-moran.mc(data$LNMEDHVAL, queenlist, nsim=999, alternative="two.sided") 
 globalmoranMC
 ```
 
@@ -256,11 +258,11 @@ ggplot(data.frame(res = globalmoranMC$res), aes(x = res)) +
        subtitle = "Observed Moran's I in Red",
        x = "Moran's I",
        y = "Count") +
-  theme_light() +
+  theme_light() +   
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 12, face = "bold"), 
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6),
+        axis.text.y=element_text(size=6), 
         axis.title=element_text(size=8))
 
 ```
@@ -269,16 +271,16 @@ ggplot(data.frame(res = globalmoranMC$res), aes(x = res)) +
 data1 <- data.frame( LNMEDHVAL = data$LNMEDHVAL, spatial_lag = lag.listw(queenlist, data$LNMEDHVAL))
 
 ggplot(data1, aes(x = LNMEDHVAL, y = spatial_lag)) +
-  geom_point(color = "#283d3b", alpha = 0.7, size = 0.6) +
-  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +
+  geom_point(color = "#283d3b", alpha = 0.7, size = 0.6) +  
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) + 
   labs(title = "Global Moran's I Scatter Plot",
        x = "Logged Median House Value",
        y = "Spatial Lag of LNMEDHVAL") +
-  theme_light() +
+  theme_light() +   
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 12, face = "bold"), 
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6),
+        axis.text.y=element_text(size=6), 
         axis.title=element_text(size=8))
 ```
 
