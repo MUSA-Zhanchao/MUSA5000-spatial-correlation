@@ -248,8 +248,24 @@ Alternatively, we can also compare the spatial models to OLS using the Moran's I
 
 ## Geographically Weighted Regression
 
+We also conduct Geographically Weighted Regression (GWR) analysis in R. Geographically Weighted Regression is a form of local regression that helps address spatial heterogeneity in data, which is essential when analyzing spatial data prone to Simpson's Paradox -- —a phenomenon where trends identified in aggregated data may differ from those found within smaller subsets of the data. GWR allows us to examine the relationships at a local level rather than assuming they are uniform across the study area. The general GWR model is defined as follows:
 
+$$
+y_i = \beta_{i0} + \sum_{k=1}^{m} \beta_{ik}x_{ik} + \epsilon_i
+$$
+where:
 
+- \(y_i\) is the dependent variable at location \(i\),
+- \(\beta_{i0}\) is the intercept at location \(i\), allowing a unique baseline for each location,
+- \(\beta_{ik}\) is the coefficients for the k-th predictors at location \(i\),
+- \(x_{ik}\) is the k-th predictor at location \(i\),
+- \(\epsilon_i\) is the error term at location \(i\).
+
+In Geographicaly Weighted Regression (GWR), local regression is performed by fitting regression model at each observing point, using a subset of neighboring points. These neighbors are weighted according to their distance from the focal point. The bandwidth controls the number of neighbors used in the regression, which influence the degree of locality in the model. A smaller bandwidth results in a more localized model, while a larger bandwidth results in a more global model.
+
+There are two types of bandwidths: adaptive and fixed. Fixed bandwidth use a constant distance for all points, while an adaptive bandwidth adjusts dynamically, ensuring a consistent number of neighbors for each regression point, regardless of variations in data density. In this case,  we use **adaptive bandwidth**, which is more appropriate as it accounts for varying spatial densities in the data. This adaptive method offers greater flexibility, allowing the model to better capture local relationships in areas with differing population distributions.
+
+Although the GWR model allows for spatial variation in relationships, the standard OLS assumptions including linerity, independence of observation, homoscedasticity, and normality of residuals still apply. Multicollinearity is accessed using the condition number. A high multicollinearity can lead to unstable estimates and clustering in parameter estimates. It is also important to not that GWR does not provide p-value for coefficient, as the model focuses on exploring spatial patterns rather than testing global hypothesis.
 
 # Results
 
