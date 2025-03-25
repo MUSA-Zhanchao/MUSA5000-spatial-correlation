@@ -265,7 +265,7 @@ In Geographicaly Weighted Regression (GWR), local regression is performed by fit
 
 There are two types of bandwidths: adaptive and fixed. Fixed bandwidth use a constant distance for all points, while an adaptive bandwidth adjusts dynamically, ensuring a consistent number of neighbors for each regression point, regardless of variations in data density. In this case,  we use **adaptive bandwidth**, which is more appropriate as it accounts for varying spatial densities in the data. This adaptive method offers greater flexibility, allowing the model to better capture local relationships in areas with differing population distributions.
 
-Although the GWR model allows for spatial variation in relationships, the standard OLS assumptions including linerity, independence of observation, homoscedasticity, and normality of residuals still apply. Multicollinearity is accessed using the condition number. A high multicollinearity can lead to unstable estimates and clustering in parameter estimates. It is also important to not that GWR does not provide p-value for coefficient, as the model focuses on exploring spatial patterns rather than testing global hypothesis. 
+Although the GWR model allows for spatial variation in relationships, the standard OLS assumptions including linerity, independence of observation, homoscedasticity, and normality of residuals still apply. Multicollinearity is accessed using the condition number. A high multicollinearity can lead to unstable estimates and clustering in parameter estimates. It is also important to not that GWR does not provide p-value for coefficient, as the model focuses on exploring spatial patterns rather than testing global hypothesis.
 
 # Results
 
