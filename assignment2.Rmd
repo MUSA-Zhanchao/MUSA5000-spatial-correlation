@@ -1,6 +1,5 @@
 ---
-title: 'MUSA 5000 Assignment 2: Using Geographically Weighted Regression, Spatial
-  Lag, and Spatial Error to Predict Median House Values in Philadelphia'
+title: 'Using Geographically Weighted Regression, Spatial Lag, and Spatial Error to Predict Median House Values in Philadelphia'
 author: "Zhanchao Yang, Haoyu Zhu, Kavana Raju"
 date: "`r Sys.Date()`"
 output:
@@ -37,6 +36,8 @@ library(RColorBrewer)
 library(spdep)
 library(spgwr)
 library(tmap)
+library(classInt)
+library(RColorBrewer)
 library(spatialreg)
 library(whitestrap)
 library(lmtest)
@@ -457,18 +458,21 @@ hl.plot(data, queenlist)
 
 ## A Review of OLS Regression and Assumptions: Results
 
-### OLS Regression
+Our previous OLS regression analysis in the assignment one found that all predictors in our OLS regression, which include PCTSINGLES, PCTVACANT, LNNBELPOV, and PCTBACHMOR, are statistically significant in explaining LNMEDHVAL. The model accounts for approximately 66.2% of the variance, as indicated by the R-squared value of 0.662. (Detailed interpretation can be found in our previous report.)
 
-Our previous OLS regression analysis found that the percentage of vacant houses, single-family homes, and residents with at least a bachelor’s degree significantly impact median house values of the census block group, while poverty levels also show a negative association. The model explains approximately 66% of the variance in log-transformed median house values, indicating that the selected predictors play a significant role in housing price patterns.
+```{r}
+reg<-lm(LNMEDHVAL ~ LNNBELPOV+PCTBACHMOR+PCTSINGLES+PCTVACANT, data=data)
+summary(reg)
+```
 
-Desptie the assumptions we detected in OLS regression, we will dectect other two assuptions, **Homoscedasticity** and **Normality of Errors**. 
+Despite the assumptions we tested in OLS regression, we detect other two assumptions further by statistics test, **Homoscedasticity** and **Normality of Errors**.
 
-#### Heteroscedasticity
+### Heteroscedasticity
 
 To detect the **Homoscedasticity**, which assumes that the variance of the errors (residuals) remains constant across all levels of the independent variables, we conducted the **Breusch-Pagan Test**, **Koenker-Bassett Test** and **White Test**. If the p-values from these tests are below the  significance level (0.001), it suggests the presence of heteroscedasticity, meaning the variance of errors is not constant. If the p-values are high, we fail to reject the null hypothesis of homoscedasticity.
 
 **The p-value of the Breusch-Pagan test is less than 0.001**, indicating strong evidence of heteroscedasticity.
- 
+
 ```{r}
 #  Breusch-Pagan test
 reg<-lm(LNMEDHVAL ~ LNNBELPOV+PCTBACHMOR+PCTSINGLES+PCTVACANT, data=data)
@@ -479,19 +483,50 @@ bptest(reg, studentize=FALSE)
 
 ```{r}
 # Koenker-Bassett Test
-bptest(reg)   
+bptest(reg)
 ```
 
 **The p-value of the White test is 0**, confirming the violation of the homoscedasticity assumption.
 
 ```{r}
 #White Test
-white_test(reg)  
+white_test(reg)
 ```
 
 Since all three tests indicate statistically significant results, we conclude that **heteroscedasticity is present in the OLS Regression**. This suggests that the variance of residuals is not constant, which may impact the efficiency of OLS estimates. To address this issue, spatial analysis techniques such as spatial lag models may be necessary to account for spatial dependence and improve model robustness.
 
-#### Normality of Errors 
+However, compared to the scatter plot we made in previous assignment to identify homoscedasticity, the scatter plot of standardized residuals against fitted values shows a relatively consistent spread of residuals across different fitted values. This suggests that the residuals' variance is relatively constant across the range of fitted values, indicating homoscedasticity. Regardless, the Breusch-Pagan, Koenker-Bassett, and White tests is often more sensitive and conservative than a residual plot. Even small deviations from homoscedasticity can be detected by these tests.
+
+```{r}
+fitted_values <- fitted(reg)
+residuals_values <- residuals(reg)
+standardized_residuals <- rstandard(reg)
+resnb<-sapply(queen, function(x) mean(standardized_residuals[x]))
+data <- data %>%
+  mutate(
+    Fitted = fitted_values,
+    Residuals = residuals_values,
+    Standardized_Residuals = standardized_residuals,
+    Residuals_NB = resnb)
+
+ggplot(data, aes(x = Fitted, y = Standardized_Residuals)) +
+  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "#c44536", size = 1) +   #
+  labs(
+    title = "Scatter Plot of Standardized Residuals vs Fitted Values",
+    x = "Fitted Values",
+    y = "Standardized Residuals"
+  ) +
+  theme_light() +
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6),
+        axis.title=element_text(size=8))
+```
+
+
+### Normality of Errors
 
 **Normality of Errors** assumes that residuals follow a normal distribution—a crucial requirement for valid hypothesis testing and confidence intervals. We use **Jarque-Bera Test** to conduct. If the p-value from this test is below the significance level (0.001), it suggests that the residuals deviate significantly from normality, indicating a violation of the normality assumption. If the p-value is high, we fail to reject the null hypothesis, suggesting that the residuals are normally distributed.
 
@@ -502,7 +537,7 @@ In this case, **the p-value is less than 0.001, providing strong evidence agains
 jarque.bera.test(reg$residuals)
 ```
 
-However, the histogram of residuals from the previous OLS regression suggests a generally normal distribution with a bell-shaped curve centered around zero. **This visual check indicates that the residuals are approximately normally distributed in terms of their values, but they may not be normally distributed in a spatial context.** To address this potential issue, alternative methods, such as incorporating spatial weights, may be necessary to account for spatial dependencies and improve the model's accuracy.
+However, the histogram of residuals from the previous OLS regression suggests a generally normal distribution with a bell-shaped curve centered around zero, as suggested in our assignment 1.  **This visual check indicates that the residuals are approximately normally distributed in terms of their values, but they may not be perfectly normally distributed in a spatial context.** In addition, Jarque Bera Test very sensitive and conservative to minor deviations from the normal distribution.  To address this potential issue, alternative methods, such as incorporating spatial weights, may be necessary to account for spatial dependencies and improve the model's accuracy.
 
 ```{r}
 #histogram of residuals
@@ -510,64 +545,88 @@ residual_data <- data.frame(residuals = residuals(reg))
 
 ggplot(residual_data, aes(x = residuals)) +
   geom_histogram(bins = 30, fill = "black") +
-  labs(title = "Histogram of Standardized Residuals", 
-       x = "Standardized Residuals", 
+  labs(title = "Histogram of Standardized Residuals",
+       x = "Standardized Residuals",
        y = "Frequency") +
-  theme_minimal() +   
+  theme_minimal() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
 ### Spatial Autocorrelation of Residuals
 
-To further examine the spatial distribution of residuals, we first generate **standardized residuals**, which are OLS Model residuals divided by an estimate of their standard deviation. We map these residuals to visually assess whether there are any spatial patterns. 
+To further examine the spatial distribution of residuals, we first generate **standardized residuals**, which are OLS Model residuals divided by an estimate of their standard deviation. We map these residuals to visually assess whether there are any spatial patterns.
 
-The map reveals some clusters of residual values, such as high-value cluster in the Far Northeast Philadelphia, suggesting a potential spatial concentration rather than random distribution. This observation calls for testing the presence of spatial autocorrelation in the residuals. 
+The map reveals some clusters of residual values, such as high-value cluster in the Far Northeast Philadelphia, suggesting a potential spatial concentration rather than random distribution. This observation calls for testing the presence of spatial autocorrelation in the residuals.
 
-We will **test the presence of spatial autocorrelation in two ways**: 1) by regressing residuals on their queen neighbors, and 2) by looking at the Moran’s I of the residuals.
-
-```{r,message=FALSE,warning=FALSE}
+```{r,message=FALSE,warning=FALSE, fig.width=8, fig.height=6}
 # g.  OLS residuals plotted
 data$OLS_RESIDU<-rstandard(reg)
 data$WT_RESIDU<-sapply(queen, function(x) mean(data$OLS_RESIDU[x]))
 
-OLS.Residuals.Map<-tm_shape(data)+
-  tm_fill(col='OLS_RESIDU', style='quantile', title='Standardized OLS Residuals',
-          palette ='Red')+
-  tm_layout(frame=FALSE, title = 'Standardised OLS Residuals')
-OLS.Residuals.Map
+quant_breaks <- classIntervals(data$OLS_RESIDU, n = 5, style = "quantile")$brks
+
+custom_labels <- c()
+for(i in seq_len(length(quant_breaks) - 1)) {
+  custom_labels[i] <- paste0(
+    round(quant_breaks[i], 2),
+    " to ",
+    round(quant_breaks[i + 1], 2)
+  )
+}
+
+data$OLS_RESIDU_quant <- cut(
+  data$OLS_RESIDU,
+  breaks        = quant_breaks,
+  include.lowest = TRUE,
+  labels        = custom_labels
+)
+
+ggplot(data) +
+  geom_sf(aes(fill = OLS_RESIDU_quant)) +
+  scale_fill_brewer(palette = "Reds", name = "Standardized OLS Residuals") +
+  labs(title = "Standardised OLS Residuals") +
+  theme(legend.position="right",
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks =element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 20, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill=NA, linewidth=0.8)
+        )
 ```
 
-#### Regressing Residuals on Spatial Lag
+We further **test the presence of spatial autocorrelation in two ways**: 1) by regressing residuals on their queen neighbors, and 2) by looking at the Moran’s I of the residuals.
 
-To assess spatial autocorrelation, we use **Queen Contiguity Matrix** as spatial weight matrix to define spatial relationships between residuals. We begin by creating a scatter plot comparing OLS residuals `OLS_RESIDU` to their spatial lag `WT_RESIDU`.  
+**Regressing Residuals on Spatial Lag**
 
-The scatter plot shows a linear relationship between the residuals and their spatial lag, suggesting that there is spatial dependence in the residuals. The **Slope** of the regression line indicated the beta coefficient of the lagged residuals (which is found to be 0.732 below), which measures the strength of this spatial relationship rather than significant. 
+To assess spatial autocorrelation, we use **Queen Contiguity Matrix** as spatial weight matrix to define spatial relationships between residuals. We begin by creating a scatter plot comparing OLS residuals `OLS_RESIDU` to their spatial lag `WT_RESIDU`.
 
-```{r,message=FALSE,warning=FALSE}
+The scatter plot shows a linear relationship between the residuals and their spatial lag, suggesting that there is spatial dependence in the residuals. The **Slope** of the regression line indicated the beta coefficient of the lagged residuals (which is found to be 0.732), which measures the strength of this spatial relationship rather than significant.
 
-# Run simple regression of OLS_RESIDU on WT_RESIDU
-lm_residuals <- lm(OLS_RESIDU ~ WT_RESIDU, data = data)
-summary(lm_residuals)
-```
-
-Then, we regress the OLS standardized residuals `OLS_RESIDU` on the spatial lag `WT_RESIDU`. The **beta coefficient** of the lagged residuals is 0.732, indicating a positive spatial relationship, consistent with the slope observed in the scatter plot. The **p-value **is less than 0.0001, confirming that this relationship is statistically significant. This confirms the presence of significant spatial autocorrelation in the residuals, meaning that nearby residuals are related and not independent.
-
-```{r}
+```{r, message=FALSE, warning=FALSE}
 # scatterplot of OLS_RESIDU by WT_RESIDU
 ggplot(data, aes(x = WT_RESIDU, y = OLS_RESIDU)) +
-  geom_point(color = "#283d3b", alpha = 0.6) +
-  geom_smooth(method = "lm", se = FALSE, color = "#c44536") +
-  labs(title = "Scatter Plot of OLS Residuals vs. Weighted Residuals",
-       x = "Weighted Residuals (WT_RESIDU)",
-       y = "OLS Residuals (OLS_RESIDU)") +
-  theme_minimal()
+  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "#c44536", size = 1) +
+  labs(title = "Residuals vs. Nearest Neighbor Residuals",
+       x = "Nearest Neighbor Residuals",
+       y = "Standardized Residuals") +
+  theme_light() +
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6),
+        axis.title=element_text(size=8))
 ```
 
-#### Morans'I
+**Moran's I**
 
 To further check the spatial autocorrelation in the OLS residuals, we calculate **Global Moran’s I of OLS residuals** and perform 999 permutations to test its statistical significance. The **Global Morans' I is 0.312, which is significantly higher than the values generated from random permutations in the histogram**, indicating the presence of spatial autocorrelation in the residuals. The results of the test has a **p-value less than 0.001**, which rejects the null hypothesis of no spatial autocorrelation, confirming that the spatial autocorrelation in residuals is statistically significant.
 
@@ -578,7 +637,8 @@ moran(data$OLS_RESIDU, queenlist, n=length(queenlist$neighbours), S0=Szero(queen
 
 moranMC<-moran.mc(data$OLS_RESIDU, queenlist, nsim=999, alternative="two.sided")  #We use 999 permutations
 moranMC
-
+```
+```{r, message=FALSE, warning=FALSE}
 ggplot(data.frame(res = moranMC$res), aes(x = res)) +
   geom_histogram(bins = 100, fill = "#283d3b") +
   geom_vline(xintercept = moranMC$statistic, color = "#c44536", linetype = 'dashed', size = 1) +
@@ -586,35 +646,35 @@ ggplot(data.frame(res = moranMC$res), aes(x = res)) +
        subtitle = "Observed Moran's I in Red",
        x = "Moran's I",
        y = "Count") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
-        axis.title=element_text(size=8)) 
+        axis.text.y=element_text(size=6),
+        axis.title=element_text(size=8))
 ```
 
 The scatter plot also shows a positive linear relationship between the residual `OLS_RESIDU` and the spatial lag of residual. It indicates the presence of positive spatial autocorrelation, meaning areas with high residuals are surrounded by other high residuals. These results also support the findings of the Global Moran’s I analysis, which identified strong positive spatial autocorrelation in the OLS residuals.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 ggplot(data = data.frame(
   OLS_RESIDU = data$OLS_RESIDU,
   spatial_lag = lag.listw(queenlist, data$OLS_RESIDU)
 ), aes(x = OLS_RESIDU, y = spatial_lag)) +
-  geom_point(color = "#283d3b", alpha = 0.7, size = 0.6) +  
-  geom_smooth(method = "lm", color = "#c44536", se = FALSE) + 
+  geom_point(color = "#283d3b", alpha = 0.7, size = 0.6) +
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +
   labs(title = "Global Moran's I Scatter Plot",
        x = "OLS_RESIDU",
        y = "Spatial Lag of OLS_RESIDU") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
-        axis.title=element_text(size=8)) 
+        axis.text.y=element_text(size=6),
+        axis.title=element_text(size=8))
 ```
 
-By regressing OLS residuals on their queen neighbors and analysis the Global Morans'I, we find **significant spatial autocorrelation in the residuals**, indicating that errors are not randomly distributed across space. This suggests that the OLS model violates the assumption of **Normality of Residuals**, which can lead to biased standard errors, inefficient estimates, and misleading statistical inferences. In particular, hypothesis tests and confidence intervals may no longer be valid, potentially affecting policy decisions or further analyses based on the model.
+Both the Moran’s I statistic and the positive beta coefficient from the regression of standardized residuals on their nearest neighbors tell a similar story. They both reveal the  **significant spatial autocorrelation in the residuals**, indicating that errors are not randomly distributed across space. This suggests that the OLS model violates the assumption of **Normality of Residuals**, which can lead to biased standard errors, inefficient estimates, and misleading statistical inferences. A spatial model like the Geographically Weighted Regression (GWR) would be more appropriate to account for spatial autocorrelation and spatial heterogeneity in the data.
 
 ## Spatial Lag and Spatial Error Regression Results
 
