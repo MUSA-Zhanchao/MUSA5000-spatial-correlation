@@ -678,6 +678,147 @@ Both the Moran’s I statistic and the positive beta coefficient from the regres
 
 ## Spatial Lag and Spatial Error Regression Results
 
+### Spatial Lag Model
+```{r}
+sl <- lagsarlm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV, data=data, queenlist)
+summary(sl)
+```
+
+```{r}
+bptest.Sarlm(sl, studentize=FALSE)
+```
+```{r}
+aic_ols <- AIC(reg)
+aic_sl <- AIC(sl)
+
+# Schwarz Criterion
+bic_ols <- BIC(reg)
+bic_sl <- BIC(sl)
+
+# The Log Likelihood
+loglik_ols <- logLik(reg)
+loglik_sl <- logLik(sl)
+
+results <- data.frame(
+  Model = c("OLS Regression", "Spatial Lag Regression"),
+  AIC = c(aic_ols, aic_sl),
+  SchwarzCriterion = c(bic_ols, bic_sl),
+  LogLikelihood = c(loglik_ols, loglik_sl)
+)
+
+results %>%
+  kable(row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) 
+```
+```{r}
+lr_test <- LR.Sarlm(sl, reg)
+lr_test
+```
+```{r}
+sl_moranMc<-moran.mc(sl$residuals, queenlist,999, alternative="two.sided")
+sl_moranMc
+```
+```{r}
+ggplot(data.frame(res = sl$residuals), aes(x = res)) +
+  geom_histogram(bins = 100, fill = "#283d3b") +
+  geom_vline(xintercept =sl_moranMc$statistic, color = "#c44536", linetype = 'dashed', size = 1) +
+  labs(title = "Observed and Permuted Moran's I of Spatial Lag Residuals",
+       subtitle = "Observed Moran's I in Red",
+       x = "Moran's I",
+       y = "Count") +
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
+```
+```{r, message=FALSE, warning=FALSE}
+ggplot(data = data.frame(
+  residuals =sl$residuals,
+  spatial_lag = lag.listw(queenlist, sl$residuals)
+), aes(x = residuals, y = spatial_lag)) +
+  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +  
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) + 
+  labs(title = "Moran's I Scatter Plot for Spatial Lag Residuals",
+       x = "Logged Median House Value",
+       y = "Spatial Lag of LNMEDHVAL") +
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
+```
+### Spatial Error Model
+```{r}
+se <- errorsarlm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV, data=data, queenlist)
+summary(se)
+```
+```{r}
+bptest.Sarlm(se, studentize=FALSE)
+```
+```{r}
+aic_se <- AIC(se)
+
+# Schwarz Criterion
+bic_se <- BIC(se)
+
+# The Log Likelihood
+loglik_se <- logLik(se)
+
+results <- data.frame(
+  Model = c("OLS Regression", "Spatial Lag Regression", "Spatial Error Regression"),
+  AIC = c(aic_ols, aic_sl, aic_se),
+  SchwarzCriterion = c(bic_ols, bic_sl, bic_se),
+  LogLikelihood = c(loglik_ols, loglik_sl, loglik_se)
+)
+
+results %>%
+  kable(row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) 
+```
+```{r}
+lr_test <- LR.Sarlm(se,reg)
+lr_test
+```
+```{r}
+se_moranMc<-moran.mc(residuals(se), queenlist,999, alternative="two.sided")
+se_moranMc
+```
+```{r}
+ggplot(data.frame(res = residuals(se)), aes(x = res)) +
+  geom_histogram(bins = 100, fill = "#283d3b") +
+  geom_vline(xintercept =se_moranMc$statistic, color = "#c44536", linetype = 'dashed', size = 1) +
+  labs(title = "Observed and Permuted Moran's I of SE Residuals",
+       subtitle = "Observed Moran's I in Red",
+       x = "Moran's I",
+       y = "Count") +
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
+```
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(data = data.frame(
+  residuals = residuals(se),
+  spatial_lag = lag.listw(queenlist, residuals(se))
+), aes(x = residuals, y = spatial_lag)) +
+  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +  
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) + 
+  labs(title = "Moran's I Scatter Plot for SE Residuals",
+       x = "Logged Median House Value",
+       y = "Spatial Lag of LNMEDHVAL") +
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
+```
 
 ## Geographically Weighted Regression Results、
 
