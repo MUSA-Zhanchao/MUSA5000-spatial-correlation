@@ -275,8 +275,9 @@ Although the GWR model allows for spatial variation in relationships, the standa
 
 ## Spatial Autocorrelation
 
-### Global Moran'I
-First, we want to see if our dependent vairable, `LNMEDHVAL` (In-transformed median housing value),exhibits spatial autocorrelation. We first apply queen contiguity weighting to define spatial `LNMEDHVAL`. The result value is **0.794**, which is close to +1, indicating a relatively strong positive spatial autocorrelation. 
+### Global Moran's I
+
+The Global Moran's I analysis for the dependent variable, `LNMEDHVAL` (the natural log of median house value) reveals a significant level of spatial autocorrelation. With a Moran's I value of **0.794**, the data exhibits strong positive spatial autocorrelation, indicating that areas with similar median house values tend to cluster together. This suggests that high-value areas are surrounded by other high-value areas, while low-value areas are surrounded by other low-value areas. 
 
 ```{r construct queen neighbors, warning=FALSE}
 
@@ -286,70 +287,104 @@ queenlist<-nb2listw(queen, style = 'W')
 moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I` 
 
 ```
-Then, we use `moran.mc` to test statistical significance. The **p-value** is less than **0.005**, confirming that the observed spatial autocorrelation is statistically significant. 
+To validate the significance of this observed spatial autocorrelation, a Monte Carlo permutation test was condicted using 1000 simulations. This approach involved randomly permuting the values of `LNMEDHVAL` across spatial locations to generate a distribution of the Moran's I values under the null hypothesis of no spatial autocorrelation. The results, showing in the histogram below, indicate the observed Moran's I value of 0.794 is significantly higher than the values generated from random permutations, emphasizes the presence of spatial autocorrelation in the data.
+
+The results of the test has a  p-value less than **0.001**. This exceptionally low p-value rejects the null hypothesis of no spatial autocorrelation, confirming that the spatial autocorrelation in `LNMEDHVAL` is statistically significant.
 
 ```{r global moran I, message=FALSE, warning=FALSE}
 globalmoranMC<-moran.mc(data$LNMEDHVAL, queenlist, nsim=999, alternative="two.sided")
 globalmoranMC
 ```
-To further illustrate this result, we generate a histogram of Moran’s I values based on **random permutations**. The value of Moran’s I in our data set (0.794) is  the much higher than the values shown in the histogram of Moran’s I values generated from random permutations, indicating our dependent variable `LNMEDHVAL` is not randomly distributed. It reinforces the presence of strong spatial correlation in our dependent variable `LNMEDHVAL`.
 
 ```{r global moran histogram plot, message=FALSE, warning=FALSE}
 
-moranMCres<-globalmoranMC$res
-hist(moranMCres, freq=10000000, nclass=100)
-abline(v=moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I`, col='red')  
+ggplot(data.frame(res = globalmoranMC$res), aes(x = res)) +
+  geom_histogram(bins = 100, fill = "#283d3b") +
+  geom_vline(xintercept = globalmoranMC$statistic, color = "#c44536", linetype = 'dashed', size = 1) +
+  labs(title = "Observed and Permuted Global Moran's I",
+       subtitle = "Observed Moran's I in Red",
+       x = "Moran's I",
+       y = "Count") +
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8)) 
 
 ```
 
-To visualize the spatial relationship further, we also create a plot. If no spatial autocorrelation were present, the plot would display no clear pattern. However, our plot shows distinct clusters, supporting the evidence of spatial autocorrelation in `LNMEDHVAL`. 
+We also create a scatterplot to visualize the relationship between the dependent variable (log transform median house value) and its spatial lag. . The x-axis represents the logged median house values LNMEDHVAL , while the y-axis displays the spatially lagged values of LNMEDHVAL, calculated based on a queen contiguity spatial weights matrix that considers neighboring spatial units. If no spatial autocorrelation were present, the plot would display no clear pattern. However, the plot shows a positive linear relationship between the logged median house values and their spatial lags, indicating the presence of positive spatial autocorrelation, where areas with higher median house values are surrounded by other high housing values areas. These results also support the findings of the Global Moran's I analysis, which identified strong positive spatial autocorrelation in the dependent variable.
 
 ```{r global moran scatter plot, message=FALSE, warning=FALSE}
-moran.plot(data$LNMEDHVAL, queenlist)
+ggplot(data = data.frame(
+  LNMEDHVAL = data$LNMEDHVAL,
+  spatial_lag = lag.listw(queenlist, data$LNMEDHVAL)
+), aes(x = LNMEDHVAL, y = spatial_lag)) +
+  geom_point(color = "#283d3b", alpha = 0.7, size = 0.6) +  
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) + 
+  labs(title = "Global Moran's I Scatter Plot",
+       x = "Logged Median House Value",
+       y = "Spatial Lag of LNMEDHVAL") +
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
 ```
 
-### Local Morans'I
+### Local Moran's I
 
-Then, we analyze the **Local Moran’s I** values for the dependent variable `LNMEDHVAL`.  Unlike Global Moran’s I, which looks at the overall pattern, Local Moran’s I helps us find specific areas where values are similar to or different from nearby areas. This allows us to identify clusters of high or low values and unusual areas that stand out. We calculate Local Moran’s I for each census block group to see if there are significant patterns in In-transformed midian housing values.
+Then, we analyze the **Local Moran’s I** values for the dependent variable `LNMEDHVAL`.  Unlike Global Moran’s I, which looks at the overall pattern, Local Moran’s I helps us find specific areas where values are similar to or different from nearby areas. This allows us to identify clusters of high or low values and unusual areas that stand out. We calculate Local Moran’s I for each census block group to see if there are significant patterns in transformed median housing values.
 
 ```{r,message=FALSE,warning=FALSE}
 # d. Local Moran's I (LISA analysis) for LNMEHVAL
 lmoran<-localmoran(data$LNMEDHVAL, queenlist)
-head(lmoran)
-
-df.lmoran <-cbind(data, as.data.frame(lmoran))
+localmoran <-cbind(data, as.data.frame(lmoran))
 ```
 
 
-To viluaize the results, we created a **significance map** to show the P-value of Local Morans'I. The p-value tells us whether the clustering is statistically significant (real) or not. In the map, **dark blue (p ≤ 0.001), blue (p ≤ 0.01), and light blue (p ≤ 0.05) indicate areas where similar median housing values are grouped together**, showing a significant spatial pattern. In contrast, **white (p > 0.05) represents areas without a strong pattern**, where median housing values are more randomly distributed. In Philadelphia, the map reveals notable clustering in areas including **Center City, City Line Avenue,Roxborough and Germantown, Far Northeast Philadelphia**, indicating statistically significant spatial correlations in these regions. 
+To visualize the results, we created a **significance map** to show the P-value of Local Moran's I. The p-value tells us whether the spatial autocorrelation is statistically significant (real) or not. Lower p-values refers to areas where the spatial autocorrelation is statistically significant, either hotspots where high values concentrate together or coldspots where lower values concentrated together. In the map, **dark red (p ≤ 0.001), red (p ≤ 0.01), and light pink (p ≤ 0.05) indicate areas where similar median housing values are grouped together**, showing a significant spatial pattern. In contrast, **grey (p > 0.05) represents areas without a strong pattern**, where median housing values are more randomly distributed. In Philadelphia, the map reveals notable clustering in areas including **Center City, City Line Avenue,Roxborough and Germantown, Far Northeast Philadelphia**, indicating statistically significant spatial correlations in these regions. 
 
-```{r,message=FALSE,warning=FALSE}
+```{r,message=FALSE,warning=FALSE, fig.width=8, fig.height=6}
 
-#Obtaining the Local Moran's P-Values (two-sided)
-data$lmp <- lmoran[, "Pr(z != E(Ii))"]
+moranSig.plot <- function(df, listw, title) {
+  
+  local <- localmoran(x = df$LNMEDHVAL, listw = listw, zero.policy = FALSE)
+  
+  df$Pr.z <- local[,  "Pr(z != E(Ii))"]  
+  
+  df$pval_category <- cut(df$Pr.z, 
+                          breaks = c(0, 0.001, 0.01, 0.05, 1), 
+                          labels = c("0.000 - 0.001", "0.001 - 0.010", "0.010 - 0.050", "0.050 - 1.000"), 
+                          include.lowest = TRUE)
+  
+  if (!inherits(df, "sf")) {
+    df <- st_as_sf(df)
+  }
+  
+  ggplot(data = df) +
+    geom_sf(aes(fill = pval_category), color = NA, alpha = 0.9) +
+    scale_fill_manual(values = c("0.000 - 0.001" = "#800f2f",
+                                 "0.001 - 0.010" = "#ff4d6d",
+                                 "0.010 - 0.050" = "#ffccd5",
+                                 "0.050 - 1.000" = "grey"),
+                      name = "P-Value") +
+    labs(title = title) +
+    theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 20, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
+}
 
-data <- st_make_valid(data)
-
-
-
-
-# LISA P-Value Map
-p_vals <- tm_shape(data) +
-  tm_polygons(col = "lmp", title = "",
-              breaks = c(-Inf, 0.001, 0.01, 0.05, Inf),
-              palette = c("darkblue", "blue", "lightblue", "white")) +
-  tm_layout(
-    legend.outside = TRUE,
-    legend.text.size = 1,
-    legend.title.size = 1,
-    fontfamily = "Arial",
-    title = "LISA P-Value Map",
-    title.size = 1.2,
-    frame = FALSE
-  )
-
-p_vals
-
+moranSig.plot(localmoran, queenlist, 'Significance Map of Local Moran I')
 ```
 
 ```{r, echo=FALSE, out.width="50%", fig.cap="Philadelphia County Map"}
@@ -358,57 +393,66 @@ knitr::include_graphics("phila.jpg")
 
 **Source:** [United Inspection Agency](https://www.unitedinspectionagency.com/twpmapphila_32.aspx)
 
-We also created a **Moran scatter plot** to figure out the relationship between each unit’s median housing value and its local Moran’s I. The plot helps identify spatial autocorrelation, showing whether areas with high or low values are clustered together or isolated. 
 
-```{r,message=FALSE,warning=FALSE}
-#Creating the LISA Clusters
-mp <- moran.plot(as.vector(scale(data$LNMEDHVAL)), queenlist)
-```
+To visualize it more clearly, we generated a  **Cluster Map** to identify different types of clustering patterns. The cluster Map derived from the Local Moran's I analysis classified census tracts in Philadelphia into high-high, high-low, low-high, low-low, or not significant. This map helps us analyze how housing values are distributed and whether they form significant spatial clusters.
 
-To visualize it more clearly, we generated a  **Cluster Map** to identify different types of clustering patterns. This map helps us analyze how housing values are distributed and whether they form significant spatial clusters.
+- **High-High (HH) Clusters**: Center City, Roxborough, Germantown, and Far Northeast Philadelphia showed **High-High (HH)** clusters, meaning areas with high median housing values are surrounded by other high-value areas. These regions typically indicate **concentrated economic activity and rich neighborhoods**.  These areas remain high house values due to high demand and possibly presence of amenities and other attractive urban features.
 
-- Center City, Roxborough, Germantown, and Far Northeast Philadelphia showed **High-High (HH)** clusters, meaning areas with high median housing values are surrounded by other high-value areas. These regions typically indicate **concentrated economic activity and rich neighborhoods**.
+- **Low-Low (LL) Clusters**: City Line Avenue, the northern part of North Philadelphia, the northeastern part of University City, and the northwestern part of South Philadelphia exhibited **Low-Low (LL)** clusters, where areas with low median housing values are surrounded by other low-value areas. These clusters may indicate **economically underdeveloped or lower-income neighborhoods**. These regions may require targeted policy interventions to address underlying issues that contribute to lower housing values.
 
-- City Line Avenue, the northern part of North Philadelphia, the northeastern part of University City, and the northwestern part of South Philadelphia exhibited **Low-Low (LL)** clusters, where areas with low median housing values are surrounded by other low-value areas. These clusters may indicate **economically underdeveloped or lower-income neighborhoods**.
+- **High-Low (HL) Clusters**: Three census blocks in South Philadelphia showed **High-Low (HL)** clusters, where high-value areas are surrounded by low-value areas. These locations represent spatial outliers, potentially indicating **newly developed commercial or residential projects in historically low-income neighborhoods** or **gentrification neighborhood**.
 
-- Three census blocks in South Philadelphia showed **High-Low (HL)** clusters, where high-value areas are surrounded by low-value areas. These locations represent spatial outliers, potentially indicating **newly developed commercial or residential projects in historically low-income neighborhoods** or **gentrification neighborhood**.
+- **Low-High (LH) Clusters**: Three scattered census blocks in Philadelphia exhibited **Low-High (LH)** clusters, meaning areas with low median housing values are surrounded by high-value areas. These clusters may correspond to **historically preserved districts with strict development regulations** or **industrial or undeveloped land within high-value urban centers**.
 
-- Three scattered census blocks in Philadelphia exhibited **Low-High (LH)** clusters, meaning areas with low median housing values are surrounded by high-value areas. These clusters may correspond to **historically preserved districts with strict development regulations** or **industrial or undeveloped land within high-value urban centers**.
+- **Non-Significant Clusters**: The remaining areas in Philadelphia were classified as **Non-Significant** in white on the map, where local Moran's O Statistic was not significant. These regions are scattered throughout the city  where house values do not exhibit significant spatial clustering patterns. These areas may have more **diverse housing markets** or **vibrant economic characteristics** compared to the clustered regions.
 
-```{r,message=FALSE,warning=FALSE}
+```{r,message=FALSE,warning=FALSE, fig.width=8, fig.height=6}
+hl.plot <- function(df, listw) {
 
-#Significance Map and Cluster Map
+  local <- localmoran(x = df$LNMEDHVAL, listw = listw, zero.policy = FALSE)
+  quadrant <- vector(mode = 'numeric', length = nrow(df))  
+  
+  m.prop <- df$LNMEDHVAL - mean(df$LNMEDHVAL)
+  m.local <- local[, 1] - mean(local[, 1])
+  signif <- 0.05
+  
+  quadrant[m.prop > 0 & m.local > 0] <- 1  # high-high
+  quadrant[m.prop < 0 & m.local < 0] <- 2  # low-low
+  quadrant[m.prop < 0 & m.local > 0] <- 4  # low-high
+  quadrant[m.prop > 0 & m.local < 0] <- 3  # high-low
+  quadrant[local[, 5] > signif] <- 5  # insignificant
+  
+  df$quadrant <- factor(quadrant, levels = c(1, 3, 5, 2, 4), 
+                        labels = c("High-High", "High-Low", "Non-Significant", "Low-Low", "Low-High"))
+                          
+  if (!inherits(df, "sf")) {
+    df <- st_as_sf(df)
+  }
+  
+  ggplot(data = df) +
+    geom_sf(aes(fill = quadrant), color = "#848884", lwd = 0.07) +
+    scale_fill_manual(values = c("High-High" = "#800f2f",
+                                 "High-Low" = "#ff4d6d",
+                                 "Non-Significant" = "white",
+                                 "Low-Low" = "#8d99ae",
+                                 "Low-High" = "#2b2d42"),
+                      name = "Cluster Type") +
+    labs(title = "Local Moran's I Cluster Map") +
+    theme(legend.position="right",
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks =element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 20, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill=NA, linewidth=0.8)
+        )
+}
 
-data$quadrant <- NA
-# high-high
-data[(mp$x >= 0 & mp$wx >= 0) & (data$lmp <= 0.05), "quadrant"]<- 1
-# low-low
-data[(mp$x <= 0 & mp$wx <= 0) & (data$lmp <= 0.05), "quadrant"]<- 2
-# high-low
-data[(mp$x >= 0 & mp$wx <= 0) & (data$lmp <= 0.05), "quadrant"]<- 3
-# low-high
-data[(mp$x <= 0 & mp$wx >= 0) & (data$lmp <= 0.05), "quadrant"]<- 4
-# non-significant
-data[(data$lmp > 0.05), "quadrant"] <- 5
+hl.plot(data, queenlist)
 
-# LISA Cluster Map
-clusters <- tm_shape(data) +
-  tm_fill(col = "quadrant", title = "",
-          breaks = c(1, 2, 3, 4, 5, 6),
-          palette = c("red", "blue", "lightpink", "skyblue2", "white"),
-          labels = c("High-High", "Low-Low", "High-Low", "Low-High", "Non-significant")) +
-  tm_borders(alpha = 0.5) +
-  tm_layout(
-    frame = FALSE,
-    legend.outside = TRUE,
-    legend.text.size = 1,
-    legend.title.size = 1,
-    fontfamily = "Arial",
-    title = "LISA Cluster Map",
-    title.size = 1.2
-  )
-
-clusters
 ```
 
 
