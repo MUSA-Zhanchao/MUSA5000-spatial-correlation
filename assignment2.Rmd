@@ -678,7 +678,21 @@ Both the Moran’s I statistic and the positive beta coefficient from the regres
 
 ## Spatial Lag and Spatial Error Regression Results
 
-### Spatial Lag Model
+### Spatial Lag Regression
+
+The spatial lag model includes the spatial lag of the dependent variable (log-transformed median house value) as a addition predictors to account for spatial autocorrelation, ($\rho W \times \text{LNMEDHVAL}$).  $\rho$ is the coefficient of the spatial lag of the dependent variable (`LNMEDHVAL`) and $W$ is the spatial weights matrix. 
+
+As shown in the spatial lag regression model results below, the p-value of the spatial lag coefficient is **less than 0.001**, indicating that the spatial lag of the dependent variable is statistically significant. The coefficient of the spatial lag of `LNMEDHVAL` is **0.651**, indicating that the neighboring areas median house value rise by 1%, lead to a average 0.651% increase in the focal area's median house value, holding other predictors constant. This also suggests the presence of the positive spatial autocorrelation in the dependent variable, as $\rho >0$, where the median house values in neighboring areas increase, the focal area's median house value also increases. 
+
+All other predictors in the spatial lag model, including `PCTVACANT`, `PCTSINGLES`, `PCTBACHMOR`, and `LNNBELPOV`, are also statistically significant.
+
+- `PCTVACANT` has a coefficient of -0.0085 and is highly significant since the p-value is **less than 0.001**. This indicates that a higher vacancy rate is associated with lower median house values. 
+- `PCTSINGLES` has a coefficient of 0.00203, which is also statistically significant with a p-value of **less than 0.001**. This suggests that a higher percentage of single-person households is associated with higher median house values. 
+- `PCTBACHMOR` has a coefficient of 0.00851 and is statistically significant with a p-value of **less than 0.001**, indicating that a higher percentage of residents with a bachelor's degree or higher is associated with higher median house values.
+- `LNNBELPOV` has a coefficient of -0.0341 and is statistically significant with a p-value of **less than 0.001**, suggesting that a higher percentage of residents below the poverty line is associated with lower median house values.
+
+The OLS model also shows significant for all predictors, but with larger coefficient for all predictors, which suggests that, in the OLS Model, all those predictors has larger effects or larger magnitude of influence on the dependent variable (`LNMEDHVAL`). For example, the coefficient of `PCTVACANT` is -0.0192 in the OLS model, while is -0.0085 in the spatial lag model. This suggests that the OLS model overestimates the influence of these predictors because of omitted spatial autocorrelation.
+
 ```{r}
 sl <- lagsarlm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV, data=data, queenlist)
 summary(sl)
@@ -750,7 +764,10 @@ ggplot(data = data.frame(
         axis.text.y=element_text(size=6), 
         axis.title=element_text(size=8))
 ```
+
 ### Spatial Error Model
+
+
 ```{r}
 se <- errorsarlm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV, data=data, queenlist)
 summary(se)
