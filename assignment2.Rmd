@@ -277,14 +277,14 @@ Although the GWR model allows for spatial variation in relationships, the standa
 
 ### Global Moran's I
 
-The Global Moran's I analysis for the dependent variable, `LNMEDHVAL` (the natural log of median house value) reveals a significant level of spatial autocorrelation. With a Moran's I value of **0.794**, the data exhibits strong positive spatial autocorrelation, indicating that areas with similar median house values tend to cluster together. This suggests that high-value areas are surrounded by other high-value areas, while low-value areas are surrounded by other low-value areas. 
+The Global Moran's I analysis for the dependent variable, `LNMEDHVAL` (the natural log of median house value) reveals a significant level of spatial autocorrelation. With a Moran's I value of **0.794**, the data exhibits strong positive spatial autocorrelation, indicating that areas with similar median house values tend to cluster together. This suggests that high-value areas are surrounded by other high-value areas, while low-value areas are surrounded by other low-value areas.
 
 ```{r construct queen neighbors, warning=FALSE}
 
 queen<-poly2nb(data, row.names=data$POLY_ID)
 queenlist<-nb2listw(queen, style = 'W')
 
-moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I` 
+moran(data$LNMEDHVAL, queenlist, n=length(queenlist$neighbours), S0=Szero(queenlist))$`I`
 
 ```
 To validate the significance of this observed spatial autocorrelation, a Monte Carlo permutation test was condicted using 1000 simulations. This approach involved randomly permuting the values of `LNMEDHVAL` across spatial locations to generate a distribution of the Moran's I values under the null hypothesis of no spatial autocorrelation. The results, showing in the histogram below, indicate the observed Moran's I value of 0.794 is significantly higher than the values generated from random permutations, emphasizes the presence of spatial autocorrelation in the data.
@@ -305,12 +305,12 @@ ggplot(data.frame(res = globalmoranMC$res), aes(x = res)) +
        subtitle = "Observed Moran's I in Red",
        x = "Moran's I",
        y = "Count") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
-        axis.title=element_text(size=8)) 
+        axis.text.y=element_text(size=6),
+        axis.title=element_text(size=8))
 
 ```
 
@@ -321,16 +321,16 @@ ggplot(data = data.frame(
   LNMEDHVAL = data$LNMEDHVAL,
   spatial_lag = lag.listw(queenlist, data$LNMEDHVAL)
 ), aes(x = LNMEDHVAL, y = spatial_lag)) +
-  geom_point(color = "#283d3b", alpha = 0.7, size = 0.6) +  
-  geom_smooth(method = "lm", color = "#c44536", se = FALSE) + 
+  geom_point(color = "#283d3b", alpha = 0.7, size = 0.6) +
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +
   labs(title = "Global Moran's I Scatter Plot",
        x = "Logged Median House Value",
        y = "Spatial Lag of LNMEDHVAL") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
@@ -345,25 +345,25 @@ localmoran <-cbind(data, as.data.frame(lmoran))
 ```
 
 
-To visualize the results, we created a **significance map** to show the P-value of Local Moran's I. The p-value tells us whether the spatial autocorrelation is statistically significant (real) or not. Lower p-values refers to areas where the spatial autocorrelation is statistically significant, either hotspots where high values concentrate together or coldspots where lower values concentrated together. In the map, **dark red (p ≤ 0.001), red (p ≤ 0.01), and light pink (p ≤ 0.05) indicate areas where similar median housing values are grouped together**, showing a significant spatial pattern. In contrast, **grey (p > 0.05) represents areas without a strong pattern**, where median housing values are more randomly distributed. In Philadelphia, the map reveals notable clustering in areas including **Center City, City Line Avenue,Roxborough and Germantown, Far Northeast Philadelphia**, indicating statistically significant spatial correlations in these regions. 
+To visualize the results, we created a **significance map** to show the P-value of Local Moran's I. The p-value tells us whether the spatial autocorrelation is statistically significant (real) or not. Lower p-values refers to areas where the spatial autocorrelation is statistically significant, either hotspots where high values concentrate together or coldspots where lower values concentrated together. In the map, **dark red (p ≤ 0.001), red (p ≤ 0.01), and light pink (p ≤ 0.05) indicate areas where similar median housing values are grouped together**, showing a significant spatial pattern. In contrast, **grey (p > 0.05) represents areas without a strong pattern**, where median housing values are more randomly distributed. In Philadelphia, the map reveals notable clustering in areas including **Center City, City Line Avenue,Roxborough and Germantown, Far Northeast Philadelphia**, indicating statistically significant spatial correlations in these regions.
 
 ```{r,message=FALSE,warning=FALSE, fig.width=8, fig.height=6}
 
 moranSig.plot <- function(df, listw, title) {
-  
+
   local <- localmoran(x = df$LNMEDHVAL, listw = listw, zero.policy = FALSE)
-  
-  df$Pr.z <- local[,  "Pr(z != E(Ii))"]  
-  
-  df$pval_category <- cut(df$Pr.z, 
-                          breaks = c(0, 0.001, 0.01, 0.05, 1), 
-                          labels = c("0.000 - 0.001", "0.001 - 0.010", "0.010 - 0.050", "0.050 - 1.000"), 
+
+  df$Pr.z <- local[,  "Pr(z != E(Ii))"]
+
+  df$pval_category <- cut(df$Pr.z,
+                          breaks = c(0, 0.001, 0.01, 0.05, 1),
+                          labels = c("0.000 - 0.001", "0.001 - 0.010", "0.010 - 0.050", "0.050 - 1.000"),
                           include.lowest = TRUE)
-  
+
   if (!inherits(df, "sf")) {
     df <- st_as_sf(df)
   }
-  
+
   ggplot(data = df) +
     geom_sf(aes(fill = pval_category), color = NA, alpha = 0.9) +
     scale_fill_manual(values = c("0.000 - 0.001" = "#800f2f",
@@ -410,25 +410,25 @@ To visualize it more clearly, we generated a  **Cluster Map** to identify differ
 hl.plot <- function(df, listw) {
 
   local <- localmoran(x = df$LNMEDHVAL, listw = listw, zero.policy = FALSE)
-  quadrant <- vector(mode = 'numeric', length = nrow(df))  
-  
+  quadrant <- vector(mode = 'numeric', length = nrow(df))
+
   m.prop <- df$LNMEDHVAL - mean(df$LNMEDHVAL)
   m.local <- local[, 1] - mean(local[, 1])
   signif <- 0.05
-  
+
   quadrant[m.prop > 0 & m.local > 0] <- 1  # high-high
   quadrant[m.prop < 0 & m.local < 0] <- 2  # low-low
   quadrant[m.prop < 0 & m.local > 0] <- 4  # low-high
   quadrant[m.prop > 0 & m.local < 0] <- 3  # high-low
   quadrant[local[, 5] > signif] <- 5  # insignificant
-  
-  df$quadrant <- factor(quadrant, levels = c(1, 3, 5, 2, 4), 
+
+  df$quadrant <- factor(quadrant, levels = c(1, 3, 5, 2, 4),
                         labels = c("High-High", "High-Low", "Non-Significant", "Low-Low", "Low-High"))
-                          
+
   if (!inherits(df, "sf")) {
     df <- st_as_sf(df)
   }
-  
+
   ggplot(data = df) +
     geom_sf(aes(fill = quadrant), color = "#848884", lwd = 0.07) +
     scale_fill_manual(values = c("High-High" = "#800f2f",
