@@ -697,10 +697,17 @@ The OLS model also shows significant for all predictors, but with larger coeffic
 sl <- lagsarlm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV, data=data, queenlist)
 summary(sl)
 ```
+We ran the **Breusch-Pegan Test** to assess whether the residuals of the spatial lag regression model exhibit heteroscedasticity. The test statistic for the spatial lag regression is **BP = 211 with degree of freedom = 4 and p-value < 0.0001**. With the extremely low p-value, we reject the null hypothesis of homosceaasticity, indicating that the residuals of the spatial lag model are still heteroscedastic.
 
 ```{r}
 bptest.Sarlm(sl, studentize=FALSE)
 ```
+We also compared the **AIC, Schwarz Criterion, and Log Likelihood** of the OLS regression and the spatial lag regression models. The results show that the spatial lag model provides a better fit compared to the OLS model. 
+
+- The spatial lag model has a significant lower **AIC** (525) than OLS model(1435), indicating a better model fit for the spatial lag model.
+- The **Schwarz Criterion** is also much lower for the spatial lag model, indicating that the spatial lag model captures the spatial structure of the data more effective.
+- The **Log Likelihood** of the spatial lag model is also higher than the OLS model, suggesting that the spatial lag model has a better explains the variance in the dependent variable.
+
 ```{r}
 aic_ols <- AIC(reg)
 aic_sl <- AIC(sl)
@@ -716,22 +723,28 @@ loglik_sl <- logLik(sl)
 results <- data.frame(
   Model = c("OLS Regression", "Spatial Lag Regression"),
   AIC = c(aic_ols, aic_sl),
-  SchwarzCriterion = c(bic_ols, bic_sl),
-  LogLikelihood = c(loglik_ols, loglik_sl)
+  Schwarz_Criterion = c(bic_ols, bic_sl),
+  Log_Likelihood = c(loglik_ols, loglik_sl)
 )
 
 results %>%
   kable(row.names = FALSE) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) 
 ```
+We also conducted a **Likelihood Ratio Test** to access the improvement in model fit between the OLS and spatial lag models. The test statistic results shows **LR = 912** with a p-value of **0.0001**, indicating that the spatial lag model is a significantly better fit than the OLS model. 
+
 ```{r}
 lr_test <- LR.Sarlm(sl, reg)
 lr_test
 ```
+Finally, we examined Moran's I for the spatial lag regression model's residuals. The obserbed Moran's I of -0.08 suggests a small negative spatial autocorrelation in the residuals of the spatial lag model. The p-value of the Moran's I test is **0.002**, indicating that the spatial autocorrelation in the residuals is statistically significant. We reject the null hypothesis of no spatial autocorrelation. However, the Moran's I value is close enough to zero, especially compared to OLS model, which suggests that the spatial lag model has effectively addressed the most of the spatial dependencies in the data.
+
 ```{r}
 sl_moranMc<-moran.mc(sl$residuals, queenlist,999, alternative="two.sided")
 sl_moranMc
 ```
+The residual histogram and the scatter plot of the residuals also support that the spatial lag model has effectively addressed the spatial autocorrelation in the residuals compared to OLS. The histogram shows a more normal distribution of residuals. The scatter plot shows a weaker relationship between residuals and their spatial lag, indicating that the spatial lag model has reduced the spatial autocorrelation in the residuals. All of these results indicate that the spatial lag model is a better fit for the data than the OLS model.
+
 ```{r}
 ggplot(data.frame(res = sl$residuals), aes(x = res)) +
   geom_histogram(bins = 100, fill = "#283d3b") +
