@@ -163,7 +163,7 @@ However, some predictors exhibited non-linear patterns, and spatial autocorrelat
 Furthermore, when data has a spatial component, the assumption of **normality of residuals** often fails to hold. In some cases, spatial autocorrelation does not significantly impact regression analysis. If the dependent variable exhibits strong spatial autocorrelation while the error term does not, the regression coefficients and significance levels remain valid. Additionally, if both the dependent and independent variables share an identical spatial pattern, and the spatial dependencies in the dependent variable are fully explained by those in the independent variable, the residuals may be spatially independent. However, this is not always the case, and **it is essential to test for spatial autocorrelation in residuals to ensure the validity of the model**.
 
 
-### Test for Sparial Autocorrelation
+### Test for Spatial Autocorrelation
 
 To test this assumption, spatial autocorrelation of the residuals can be examined using **Moran’s I**, which measures whether residuals are clustered, dispersed, or randomly distributed in space. As mentioned before, it is first extract the residuals and define a spatial weights matrix (e.g., Queen or Rook contiguity). Then, Moran’s I is computed to measure the degree of clustering in residuals, with values close to +1 indicating positive spatial autocorrelation, -1 indicating negative autocorrelation, and 0 suggesting randomness.
 
@@ -270,7 +270,7 @@ In Geographicaly Weighted Regression (GWR), local regression is performed by fit
 
 There are two types of bandwidths: adaptive and fixed. Fixed bandwidth use a constant distance for all points, while an adaptive bandwidth adjusts dynamically, ensuring a consistent number of neighbors for each regression point, regardless of variations in data density. In this case,  we use **adaptive bandwidth**, which is more appropriate as it accounts for varying spatial densities in the data. This adaptive method offers greater flexibility, allowing the model to better capture local relationships in areas with differing population distributions.
 
-Although the GWR model allows for spatial variation in relationships, the standard OLS assumptions including linerity, independence of observation, homoscedasticity, and normality of residuals still apply. Multicollinearity is accessed using the condition number. A high multicollinearity can lead to unstable estimates and clustering in parameter estimates. It is also important to not that GWR does not provide p-value for coefficient, as the model focuses on exploring spatial patterns rather than testing global hypothesis.
+Although the GWR model allows for spatial variation in relationships, the standard OLS assumptions including linerity, independence of observation, homoscedasticity, and normality of residuals still apply. Multicollinearity is accessed using the condition number. A high multicollinearity can lead to unstable estimates and clustering in parameter estimates. It is also important to note that GWR does not provide p-value for coefficient, as the model focuses on exploring spatial patterns rather than testing global hypothesis.
 
 # Results
 
@@ -820,8 +820,208 @@ ggplot(data = data.frame(
         axis.title=element_text(size=8))
 ```
 
-## Geographically Weighted Regression Results、
+## Geographically Weighted Regression Results
 
+Geographically Weighted Regression (GWR) is a spatial statistical method that allows regression coefficients to vary across space. This flexibility enables the model to better account for spatial heterogeneity, offering localized insights into relationships between predictors and the dependent variable (in this case, LNMEDHVAL).
 
+To begin the analysis, we identify the optimal adaptive bandwidth for the GWR model using cross-validation.
 
-# Discussion
+```{r}
+# Prepare coordinates from sf geometry
+coords <- st_coordinates(st_centroid(data))
+coordinates <- as.matrix(coords)
+
+# Run adaptive bandwidth selection
+bw_gwr <- gwr.sel(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV,
+                  data = as(data, "Spatial"),
+                  coords = coordinates,
+                  adapt = TRUE)
+
+```
+
+Using the selected bandwidth, we estimate the GWR model.
+
+```{r}
+#Run GWR
+model_gwr <- gwr(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV,
+                 data = as(data, "Spatial"),
+                 coords = coordinates,
+                 adapt = bw_gwr,
+                 hatmatrix = TRUE, se.fit = TRUE)
+
+# Extract results
+results_gwr <- model_gwr$SDF
+```
+### Global GWR Results
+
+We begin by comparing the R-squared of the GWR model with that of the OLS model.
+
+```{r}
+# Compare R-squared
+rss_gwr <- model_gwr$results$rss
+mean_y <- mean(data$LNMEDHVAL)
+tss <- sum((data$LNMEDHVAL - mean_y)^2)
+r2_gwr <- 1 - (rss_gwr / tss)
+
+r2_ols <- summary(reg)$r.squared
+
+r2_compare <- data.frame(
+  Model = c("OLS", "GWR"),
+  R_squared = c(r2_ols, r2_gwr))
+
+r2_compare %>%
+  kable(row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+The GWR model has a higher R-squared value than the OLS model, indicating that it explains more variance in the dependent variable.
+
+Next, we compare model fit using Akaike Information Criteria (AIC and AICc). **AIC** (Akaike Information Criterion) measures the relative quality of a statistical model, balancing goodness of fit and complexity. **AICc** is a corrected version of AIC, more accurate for smaller sample sizes or models with many parameters—such as GWR. While AIC is commonly reported for OLS, Spatial Lag, and Spatial Error models, GWR reports AICc instead.
+
+```{r}
+# Extract AICc
+aicc_gwr <- model_gwr$results$AICc
+
+model_names <- c("OLS", "Spatial Lag", "Spatial Error", "GWR")
+aic_vals <- c(aic_ols, aic_sl, aic_se, NA)
+aicc_vals <- c(NA, NA, NA, aicc_gwr)
+
+aic_table <- data.frame(
+  Model = model_names,
+  AIC = c(format(ols_aic, digits = 3), format(sl_aic, digits = 3), format(se_aic, digits = 3), "-"),
+  AICc = c("-", "-", "-", format(gwr_aicc, digits = 3))
+)
+
+aic_table %>%
+  kable(row.names = FALSE, caption = "Comparison of AIC and AICc Values Across Models") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+```
+
+As shown above, the OLS, Spatial Lag, and Spatial Error models report AIC, while the GWR model reports AICc. Although the two metrics are not strictly comparable, they serve similar purposes. The lower AICc of the GWR model supports its superior fit in handling spatial heterogeneity.
+
+Next, we assess the spatial autocorrelation of the GWR residuals. Specifically, we compare Moran’s I values across all models to determine whether GWR effectively reduces spatial autocorrelation.
+
+```{r}
+# Moran's I test for GWR residuals
+residuals_gwr <- results_gwr$gwr.e
+moran_mc_gwr <- moran.mc(residuals_gwr, queenlist, nsim = 999)
+```
+
+The Moran’s I for GWR residuals is approximately 0.06 with a p-value of 0.001, indicating a significant reduction in spatial autocorrelation compared to the OLS residuals (Moran’s I ≈ 0.31). This value is also lower than the Moran’s I values for the Spatial Lag and Spatial Error residuals, suggesting GWR is more effective at accounting for spatial dependence.
+
+```{r}
+ggplot(data.frame(res = residuals_gwr), aes(x = res)) +
+  geom_histogram(bins = 50, fill = "#283d3b") +
+  geom_vline(xintercept = moran_mc_gwr$statistic, color = "#c44536", linetype = 'dashed', size = 1) +
+  labs(title = "Observed and Permuted Moran's I of GWR Residuals",
+       subtitle = "Observed Moran's I in Red",
+       x = "Moran's I",
+       y = "Count") +
+  theme_light() +
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
+```
+
+```{r gwr-residual-scatterplot}
+ggplot(data = data.frame(
+  residuals = residuals_gwr,
+  spatial_lag = lag.listw(queenlist, residuals_gwr)
+), aes(x = residuals, y = spatial_lag)) +
+  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +
+  labs(title = "Moran's I Scatter Plot for GWR Residuals",
+       x = "GWR Residuals",
+       y = "Spatial Lag of Residuals") +
+  theme_light() +
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
+```
+
+The histogram and scatterplot demonstrate that the GWR model significantly reduces spatial autocorrelation in the residuals compared to other models. This improvement in residual independence confirms the advantage of using a localized regression approach in spatial data contexts.
+
+### Local GWR Results
+
+While the global GWR model provides an improved overall fit, it is equally important to assess how predictor effects and model performance vary across space. This section presents maps of **t-values** (coefficient divided by standard error) for each predictor and a choropleth of **local R²** values. These visualizations help identify where predictors are locally significant and how well the model fits in different neighborhoods.
+
+We begin by calculating the t-values for each coefficient:
+
+```{r}
+
+# t-values (coefficient / standard error)
+data$t_PCTVACANT   <- results_gwr$PCTVACANT   / results_gwr$PCTVACANT_se
+data$t_PCTSINGLES  <- results_gwr$PCTSINGLES  / results_gwr$PCTSINGLES_se
+data$t_PCTBACHMOR  <- results_gwr$PCTBACHMOR  / results_gwr$PCTBACHMOR_se
+data$t_LNNBELPOV   <- results_gwr$LNNBELPOV   / results_gwr$LNNBELPOV_se
+
+make_tval_map <- function(df, variable, title) {
+  breaks <- classInt::classIntervals(df[[variable]], n = 5, style = "quantile")$brks
+  labels <- sapply(1:(length(breaks) - 1), function(i) {
+    paste0(round(breaks[i], 2), " to ", round(breaks[i + 1], 2))
+  })
+  df$cat <- cut(df[[variable]], breaks = breaks, include.lowest = TRUE, labels = labels)
+
+  ggplot(df) +
+    geom_sf(aes(fill = cat), color = NA) +
+    scale_fill_brewer(palette = "RdBu", name = "t-value") +
+    labs(title = title) +
+    theme_light() +
+    theme(
+      plot.title = element_text(size = 14, face = "bold"),
+      legend.title = element_text(size = 9),
+      legend.text = element_text(size = 8),
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      axis.title = element_blank(),
+      panel.border = element_rect(colour = "grey", fill = NA, linewidth = 0.6)
+    )
+}
+
+p1 <- make_tval_map(data, "t_PCTVACANT", "t-value: PCTVACANT")
+p2 <- make_tval_map(data, "t_PCTSINGLES", "t-value: PCTSINGLES")
+p3 <- make_tval_map(data, "t_PCTBACHMOR", "t-value: PCTBACHMOR")
+p4 <- make_tval_map(data, "t_LNNBELPOV", "t-value: LNNBELPOV")
+
+(p1 + p2) / (p3 + p4)
+```
+
+These t-value maps reveal substantial geographic variation in predictor significance. For example, PCTVACANT is statistically significant in parts of West and North Philadelphia, while PCTBACHMOR shows significance more broadly across affluent regions. LNNBELPOV is notably significant in many central areas, suggesting poverty’s localized influence on house values.
+
+Next, we explore model fit at the local level by visualizing the local R² values from the GWR model.
+
+```{r}
+data$localR2 <- results_gwr$localR2
+
+breaks <- classInt::classIntervals(data$localR2, n = 5, style = "quantile")$brks
+labels <- sapply(1:(length(breaks) - 1), function(i) {
+  paste0(round(breaks[i], 2), " to ", round(breaks[i + 1], 2))
+})
+data$localR2_cat <- cut(data$localR2, breaks = breaks, include.lowest = TRUE, labels = labels)
+
+ggplot(data) +
+  geom_sf(aes(fill = localR2_cat), color = NA) +
+  scale_fill_brewer(palette = "Purples", name = "Local R²") +
+  labs(title = "Local R² Values from GWR") +
+  theme_light() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    panel.border = element_rect(colour = "grey", fill = NA, linewidth = 0.6)
+  )
+```
+
+The choropleth map of local R² illustrates the spatial variation in how well the GWR model explains median house values across Philadelphia. Most neighborhoods fall within a moderate to high explanatory range, with local R² values commonly between 0.59 and 0.74. Particularly strong model performance is observed in South Philadelphia, Roxborough–Manayunk, and portions of the Far Northeast, where local R² values exceed 0.74. These areas exhibit stronger spatial relationships between the predictors and housing values. In contrast, several central and north-central tracts, especially around Center City and North Philadelphia, show lower local R² values (as low as 0.17), suggesting the model does not capture as much of the local variation in these areas. This could be due to the influence of unobserved neighborhood characteristics, development dynamics, or non-linear relationships not accounted for by the current predictors.
+
+Together, these spatial diagnostics confirm that the relationships between predictors and median house values are not constant across space, further supporting the case for using GWR over global regression models.
+
+#   Discussion
+
