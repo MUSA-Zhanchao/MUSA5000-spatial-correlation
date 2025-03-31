@@ -826,7 +826,7 @@ Geographically Weighted Regression (GWR) is a spatial statistical method that al
 
 To begin the analysis, we identify the optimal adaptive bandwidth for the GWR model using cross-validation.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 # Prepare coordinates from sf geometry
 coords <- st_coordinates(st_centroid(data))
 coordinates <- as.matrix(coords)
@@ -841,7 +841,7 @@ bw_gwr <- gwr.sel(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV,
 
 Using the selected bandwidth, we estimate the GWR model.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 #Run GWR
 model_gwr <- gwr(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV,
                  data = as(data, "Spatial"),
@@ -925,7 +925,7 @@ ggplot(data.frame(res = residuals_gwr), aes(x = res)) +
         axis.title=element_text(size=8))
 ```
 
-```{r gwr-residual-scatterplot}
+```{r, message=FALSE, warning=FALSE}
 ggplot(data = data.frame(
   residuals = residuals_gwr,
   spatial_lag = lag.listw(queenlist, residuals_gwr)
