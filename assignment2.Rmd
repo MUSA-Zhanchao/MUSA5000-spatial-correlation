@@ -13,6 +13,11 @@ output:
     mathjax: default
 ---
 
+Keywords: Spatial Lag Regression, Spatial Error Regression, Geographically Weighted Regression, OLS
+
+GitHub Repository: [MUSA5000-Spatial-Correlation](https://github.com/zyang91/MUSA5000-spatial-correlation) \|
+[Website](https://zyang91.github.io/MUSA5000-spatial-correlation/)
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 options(scipen=999)
