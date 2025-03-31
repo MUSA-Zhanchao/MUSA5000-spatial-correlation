@@ -687,7 +687,7 @@ Both the Moran’s I statistic and the positive beta coefficient from the regres
 
 The spatial lag model includes the spatial lag of the dependent variable (log-transformed median house value) as a addition predictors to account for spatial autocorrelation, ($\rho W \times \text{LNMEDHVAL}$).  $\rho$ is the coefficient of the spatial lag of the dependent variable (`LNMEDHVAL`) and $W$ is the spatial weights matrix. 
 
-As shown in the spatial lag regression model results below, the p-value of the spatial lag coefficient is **less than 0.001**, indicating that the spatial lag of the dependent variable is statistically significant. The coefficient of the spatial lag of `LNMEDHVAL` is **0.651**, indicating that the neighboring areas median house value rise by 1%, lead to a average 0.651% increase in the focal area's median house value, holding other predictors constant. This also suggests the presence of the positive spatial autocorrelation in the dependent variable, as $\rho >0$, where the median house values in neighboring areas increase, the focal area's median house value also increases. 
+As shown in the spatial lag regression model results below, the p-value of the spatial lag coefficient is **less than 0.001**, indicating that the spatial lag of the dependent variable is statistically significant. The coefficient of the spatial lag of `LNMEDHVAL` is **0.651**, indicating that the neighboring areas median house value rise by 1%, lead to a average 0.651% increase in the focal area's median house value, holding other predictors constant. This also suggests the presence of the positive spatial autocorrelation in the dependent variable, as $\rho >0$, where high-value areas are surrounded by other high-value areas.
 
 All other predictors in the spatial lag model, including `PCTVACANT`, `PCTSINGLES`, `PCTBACHMOR`, and `LNNBELPOV`, are also statistically significant.
 
@@ -784,6 +784,19 @@ ggplot(data = data.frame(
 ```
 
 ### Spatial Error Model
+
+The spatial error model includes the spatial error term ($\lambda W \times \epsilon + u$) to account for spatial autocorrelation in the residuals. $\lambda$ is the coefficient of the spatial error term, and $W$ is the spatial weights matrix. $u$ is the random noise.
+
+In this case, $\lambda$ is estimated at 0.815 and is statistically significant with a p-value of **less than 0.001**. This indicates that the spatial error term is a significant predictor of the dependent variable. It also indicate that the strong spatial autocorrelation in the error terms. 
+
+Besides, all other predictors in the spatial error model, including `PCTVACANT`, `PCTSINGLES`, `PCTBACHMOR`, and `LNNBELPOV`, are also statistically significant.
+
+- `PCTVACANT` has a coefficient of -0.0057 and is highly significant since the p-value is **less than 0.001**. This indicates that a higher vacancy rate is associated with lower median house values.
+- `PCTSINGLES` has a coefficient of 0.0027, which is also statistically significant with a p-value of **less than 0.001**. This suggests that a higher percentage of single-unit households is positive associated with higher median house values.
+- `PCTBACHMOR` has a coefficient of 0.0098 and is statistically significant with a p-value of **less than 0.001**, indicating that a higher percentage of residents with a bachelor's degree or higher is associated with higher median house values.
+- `LNNBELPOV` has a coefficient of -0.0345 and is statistically significant with a p-value of **less than 0.001**, suggesting that a higher percentage of residents below the poverty line is negative associated with lower median house values.
+
+Similar to spatial lag regression, when comparing these results with the OLS regression model, the coefficients for our predictors are smaller than in the OLS model. For example, the coefficient of `PCTVACANT` is -0.0192 in the OLS model, while it is -0.0057 in the spatial error model. This suggests that the OLS model overestimates the influence of these predictors due to omitted spatial autocorrelation.
 
 
 ```{r}
