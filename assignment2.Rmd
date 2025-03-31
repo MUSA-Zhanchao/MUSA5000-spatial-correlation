@@ -685,14 +685,14 @@ Both the Moran’s I statistic and the positive beta coefficient from the regres
 
 ### Spatial Lag Regression
 
-The spatial lag model includes the spatial lag of the dependent variable (log-transformed median house value) as a addition predictors to account for spatial autocorrelation, ($\rho W \times \text{LNMEDHVAL}$).  $\rho$ is the coefficient of the spatial lag of the dependent variable (`LNMEDHVAL`) and $W$ is the spatial weights matrix. 
+The spatial lag model includes the spatial lag of the dependent variable (log-transformed median house value) as a addition predictors to account for spatial autocorrelation, ($\rho W \times \text{LNMEDHVAL}$).  $\rho$ is the coefficient of the spatial lag of the dependent variable (`LNMEDHVAL`) and $W$ is the spatial weights matrix.
 
 As shown in the spatial lag regression model results below, the p-value of the spatial lag coefficient is **less than 0.001**, indicating that the spatial lag of the dependent variable is statistically significant. The coefficient of the spatial lag of `LNMEDHVAL` is **0.651**, indicating that the neighboring areas median house value rise by 1%, lead to a average 0.651% increase in the focal area's median house value, holding other predictors constant. This also suggests the presence of the positive spatial autocorrelation in the dependent variable, as $\rho >0$, where high-value areas are surrounded by other high-value areas.
 
 All other predictors in the spatial lag model, including `PCTVACANT`, `PCTSINGLES`, `PCTBACHMOR`, and `LNNBELPOV`, are also statistically significant.
 
-- `PCTVACANT` has a coefficient of -0.0085 and is highly significant since the p-value is **less than 0.001**. This indicates that a higher vacancy rate is associated with lower median house values. 
-- `PCTSINGLES` has a coefficient of 0.00203, which is also statistically significant with a p-value of **less than 0.001**. This suggests that a higher percentage of single-person households is associated with higher median house values. 
+- `PCTVACANT` has a coefficient of -0.0085 and is highly significant since the p-value is **less than 0.001**. This indicates that a higher vacancy rate is associated with lower median house values.
+- `PCTSINGLES` has a coefficient of 0.00203, which is also statistically significant with a p-value of **less than 0.001**. This suggests that a higher percentage of single-person households is associated with higher median house values.
 - `PCTBACHMOR` has a coefficient of 0.00851 and is statistically significant with a p-value of **less than 0.001**, indicating that a higher percentage of residents with a bachelor's degree or higher is associated with higher median house values.
 - `LNNBELPOV` has a coefficient of -0.0341 and is statistically significant with a p-value of **less than 0.001**, suggesting that a higher percentage of residents below the poverty line is associated with lower median house values.
 
@@ -707,7 +707,7 @@ We ran the **Breusch-Pegan Test** to assess whether the residuals of the spatial
 ```{r}
 bptest.Sarlm(sl, studentize=FALSE)
 ```
-We also compared the **AIC, Schwarz Criterion, and Log Likelihood** of the OLS regression and the spatial lag regression models. The results show that the spatial lag model provides a better fit compared to the OLS model. 
+We also compared the **AIC, Schwarz Criterion, and Log Likelihood** of the OLS regression and the spatial lag regression models. The results show that the spatial lag model provides a better fit compared to the OLS model.
 
 - The spatial lag model has a significant lower **AIC** (525) than OLS model(1435), indicating a better model fit for the spatial lag model.
 - The **Schwarz Criterion** is also much lower for the spatial lag model, indicating that the spatial lag model captures the spatial structure of the data more effective.
@@ -734,9 +734,9 @@ results <- data.frame(
 
 results %>%
   kable(row.names = FALSE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
-We also conducted a **Likelihood Ratio Test** to access the improvement in model fit between the OLS and spatial lag models. The test statistic results shows **LR = 912** with a p-value of **0.0001**, indicating that the spatial lag model is a significantly better fit than the OLS model. 
+We also conducted a **Likelihood Ratio Test** to access the improvement in model fit between the OLS and spatial lag models. The test statistic results shows **LR = 912** with a p-value of **0.0001**, indicating that the spatial lag model is a significantly better fit than the OLS model.
 
 ```{r}
 lr_test <- LR.Sarlm(sl, reg)
@@ -758,11 +758,11 @@ ggplot(data.frame(res = sl$residuals), aes(x = res)) +
        subtitle = "Observed Moran's I in Red",
        x = "Moran's I",
        y = "Count") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 ```{r, message=FALSE, warning=FALSE}
@@ -770,16 +770,16 @@ ggplot(data = data.frame(
   residuals =sl$residuals,
   spatial_lag = lag.listw(queenlist, sl$residuals)
 ), aes(x = residuals, y = spatial_lag)) +
-  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +  
-  geom_smooth(method = "lm", color = "#c44536", se = FALSE) + 
+  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +
   labs(title = "Moran's I Scatter Plot for Spatial Lag Residuals",
        x = "Logged Median House Value",
        y = "Spatial Lag of LNMEDHVAL") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
@@ -787,7 +787,7 @@ ggplot(data = data.frame(
 
 The spatial error model includes the spatial error term ($\lambda W \times \epsilon + u$) to account for spatial autocorrelation in the residuals. $\lambda$ is the coefficient of the spatial error term, and $W$ is the spatial weights matrix. $u$ is the random noise.
 
-In this case, $\lambda$ is estimated at 0.815 and is statistically significant with a p-value of **less than 0.001**. This indicates that the spatial error term is a significant predictor of the dependent variable. It also indicate that the strong spatial autocorrelation in the error terms. 
+In this case, $\lambda$ is estimated at 0.815 and is statistically significant with a p-value of **less than 0.001**. This indicates that the spatial error term is a significant predictor of the dependent variable. It also indicate that the strong spatial autocorrelation in the error terms.
 
 Besides, all other predictors in the spatial error model, including `PCTVACANT`, `PCTSINGLES`, `PCTBACHMOR`, and `LNNBELPOV`, are also statistically significant.
 
@@ -824,7 +824,7 @@ results <- data.frame(
 
 results %>%
   kable(row.names = FALSE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 ```{r}
 lr_test <- LR.Sarlm(se,reg)
@@ -842,11 +842,11 @@ ggplot(data.frame(res = residuals(se)), aes(x = res)) +
        subtitle = "Observed Moran's I in Red",
        x = "Moran's I",
        y = "Count") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
@@ -855,16 +855,16 @@ ggplot(data = data.frame(
   residuals = residuals(se),
   spatial_lag = lag.listw(queenlist, residuals(se))
 ), aes(x = residuals, y = spatial_lag)) +
-  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +  
-  geom_smooth(method = "lm", color = "#c44536", se = FALSE) + 
+  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +
   labs(title = "Moran's I Scatter Plot for SE Residuals",
        x = "Logged Median House Value",
        y = "Spatial Lag of LNMEDHVAL") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
@@ -878,7 +878,7 @@ bw_gwr <- gwr.sel(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV,
                   data = as(data, "Spatial"),
                   method = "aic",
                   adapt = TRUE)
- 
+
 
 #Run GWR
 model_gwr <- gwr(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV,
@@ -970,9 +970,9 @@ ggplot(data.frame(res = residuals_gwr), aes(x = res)) +
        y = "Count") +
   theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
@@ -988,9 +988,9 @@ ggplot(data = data.frame(
        y = "Spatial Lag of Residuals") +
   theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
