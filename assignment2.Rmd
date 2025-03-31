@@ -685,14 +685,14 @@ Both the Moran’s I statistic and the positive beta coefficient from the regres
 
 ### Spatial Lag Regression
 
-The spatial lag model includes the spatial lag of the dependent variable (log-transformed median house value) as a addition predictors to account for spatial autocorrelation, ($\rho W \times \text{LNMEDHVAL}$).  $\rho$ is the coefficient of the spatial lag of the dependent variable (`LNMEDHVAL`) and $W$ is the spatial weights matrix. 
+The spatial lag model includes the spatial lag of the dependent variable (log-transformed median house value) as a addition predictors to account for spatial autocorrelation, ($\rho W \times \text{LNMEDHVAL}$).  $\rho$ is the coefficient of the spatial lag of the dependent variable (`LNMEDHVAL`) and $W$ is the spatial weights matrix.
 
 As shown in the spatial lag regression model results below, the p-value of the spatial lag coefficient is **less than 0.001**, indicating that the spatial lag of the dependent variable is statistically significant. The coefficient of the spatial lag of `LNMEDHVAL` is **0.651**, indicating that the neighboring areas median house value rise by 1%, lead to a average 0.651% increase in the focal area's median house value, holding other predictors constant. This also suggests the presence of the positive spatial autocorrelation in the dependent variable, as $\rho >0$, where high-value areas are surrounded by other high-value areas.
 
 All other predictors in the spatial lag model, including `PCTVACANT`, `PCTSINGLES`, `PCTBACHMOR`, and `LNNBELPOV`, are also statistically significant.
 
-- `PCTVACANT` has a coefficient of -0.0085 and is highly significant since the p-value is **less than 0.001**. This indicates that a higher vacancy rate is associated with lower median house values. 
-- `PCTSINGLES` has a coefficient of 0.00203, which is also statistically significant with a p-value of **less than 0.001**. This suggests that a higher percentage of single-person households is associated with higher median house values. 
+- `PCTVACANT` has a coefficient of -0.0085 and is highly significant since the p-value is **less than 0.001**. This indicates that a higher vacancy rate is associated with lower median house values.
+- `PCTSINGLES` has a coefficient of 0.00203, which is also statistically significant with a p-value of **less than 0.001**. This suggests that a higher percentage of single-person households is associated with higher median house values.
 - `PCTBACHMOR` has a coefficient of 0.00851 and is statistically significant with a p-value of **less than 0.001**, indicating that a higher percentage of residents with a bachelor's degree or higher is associated with higher median house values.
 - `LNNBELPOV` has a coefficient of -0.0341 and is statistically significant with a p-value of **less than 0.001**, suggesting that a higher percentage of residents below the poverty line is associated with lower median house values.
 
@@ -707,7 +707,7 @@ We ran the **Breusch-Pegan Test** to assess whether the residuals of the spatial
 ```{r}
 bptest.Sarlm(sl, studentize=FALSE)
 ```
-We also compared the **AIC, Schwarz Criterion, and Log Likelihood** of the OLS regression and the spatial lag regression models. The results show that the spatial lag model provides a better fit compared to the OLS model. 
+We also compared the **AIC, Schwarz Criterion, and Log Likelihood** of the OLS regression and the spatial lag regression models. The results show that the spatial lag model provides a better fit compared to the OLS model.
 
 - The spatial lag model has a significant lower **AIC** (525) than OLS model(1435), indicating a better model fit for the spatial lag model.
 - The **Schwarz Criterion** is also much lower for the spatial lag model, indicating that the spatial lag model captures the spatial structure of the data more effective.
@@ -734,9 +734,9 @@ results <- data.frame(
 
 results %>%
   kable(row.names = FALSE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
-We also conducted a **Likelihood Ratio Test** to access the improvement in model fit between the OLS and spatial lag models. The test statistic results shows **LR = 912** with a p-value of **0.0001**, indicating that the spatial lag model is a significantly better fit than the OLS model. 
+We also conducted a **Likelihood Ratio Test** to access the improvement in model fit between the OLS and spatial lag models. The test statistic results shows **LR = 912** with a p-value of **0.0001**, indicating that the spatial lag model is a significantly better fit than the OLS model.
 
 ```{r}
 lr_test <- LR.Sarlm(sl, reg)
@@ -758,11 +758,11 @@ ggplot(data.frame(res = sl$residuals), aes(x = res)) +
        subtitle = "Observed Moran's I in Red",
        x = "Moran's I",
        y = "Count") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 ```{r, message=FALSE, warning=FALSE}
@@ -770,16 +770,16 @@ ggplot(data = data.frame(
   residuals =sl$residuals,
   spatial_lag = lag.listw(queenlist, sl$residuals)
 ), aes(x = residuals, y = spatial_lag)) +
-  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +  
-  geom_smooth(method = "lm", color = "#c44536", se = FALSE) + 
+  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +
   labs(title = "Moran's I Scatter Plot for Spatial Lag Residuals",
        x = "Logged Median House Value",
        y = "Spatial Lag of LNMEDHVAL") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
@@ -787,7 +787,7 @@ ggplot(data = data.frame(
 
 The spatial error model includes the spatial error term ($\lambda W \times \epsilon + u$) to account for spatial autocorrelation in the residuals. $\lambda$ is the coefficient of the spatial error term, and $W$ is the spatial weights matrix. $u$ is the random noise.
 
-In this case, $\lambda$ is estimated at 0.815 and is statistically significant with a p-value of **less than 0.001**. This indicates that the spatial error term is a significant predictor of the dependent variable. It also indicate that the strong spatial autocorrelation in the error terms. 
+In this case, $\lambda$ is estimated at 0.815 and is statistically significant with a p-value of **less than 0.001**. This indicates that the spatial error term is a significant predictor of the dependent variable. It also indicate that the strong spatial autocorrelation in the error terms.
 
 Besides, all other predictors in the spatial error model, including `PCTVACANT`, `PCTSINGLES`, `PCTBACHMOR`, and `LNNBELPOV`, are also statistically significant.
 
@@ -824,7 +824,7 @@ results <- data.frame(
 
 results %>%
   kable(row.names = FALSE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 ```{r}
 lr_test <- LR.Sarlm(se,reg)
@@ -842,11 +842,11 @@ ggplot(data.frame(res = residuals(se)), aes(x = res)) +
        subtitle = "Observed Moran's I in Red",
        x = "Moran's I",
        y = "Count") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
@@ -855,16 +855,16 @@ ggplot(data = data.frame(
   residuals = residuals(se),
   spatial_lag = lag.listw(queenlist, residuals(se))
 ), aes(x = residuals, y = spatial_lag)) +
-  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +  
-  geom_smooth(method = "lm", color = "#c44536", se = FALSE) + 
+  geom_point(color = "#283d3b", alpha = 0.9, size = 0.6) +
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +
   labs(title = "Moran's I Scatter Plot for SE Residuals",
        x = "Logged Median House Value",
        y = "Spatial Lag of LNMEDHVAL") +
-  theme_light() +   
+  theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
@@ -878,7 +878,7 @@ bw_gwr <- gwr.sel(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV,
                   data = as(data, "Spatial"),
                   method = "aic",
                   adapt = TRUE)
- 
+
 
 #Run GWR
 model_gwr <- gwr(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV,
@@ -970,9 +970,9 @@ ggplot(data.frame(res = residuals_gwr), aes(x = res)) +
        y = "Count") +
   theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
@@ -988,9 +988,9 @@ ggplot(data = data.frame(
        y = "Spatial Lag of Residuals") +
   theme_light() +
   theme(plot.subtitle = element_text(size = 9,face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
+        plot.title = element_text(size = 12, face = "bold"),
         axis.text.x=element_text(size=6),
-        axis.text.y=element_text(size=6), 
+        axis.text.y=element_text(size=6),
         axis.title=element_text(size=8))
 ```
 
@@ -1074,12 +1074,12 @@ The choropleth map of local R² illustrates the spatial variation in how well th
 
 Together, these spatial diagnostics confirm that the relationships between predictors and median house values are not constant across space, further supporting the case for using GWR over global regression models.
 
-#   Discussion
+# Discussion
 
-In this paper, we analyzed the spatial variation in median house values across Philadelphia using four regression techniques: Ordinary Least Squares (OLS), Spatial Lag, Spatial Error, and Geographically Weighted Regression (GWR). While OLS provided a useful baseline, we found significant spatial autocorrelation in its residuals (Moran’s I ≈ 0.31), indicating a violation of model assumptions. Both the Spatial Lag and Spatial Error models improved upon OLS by accounting for spatial dependencies, and the Likelihood Ratio tests confirmed that these models were statistically superior to OLS. However, GWR outperformed all other models, achieving the highest R² (≈ 0.72) and the lowest residual spatial autocorrelation (Moran’s I ≈ 0.06). Moreover, it provided localized insight into how each predictor’s influence varied across neighborhoods, revealing nuanced spatial patterns that global models could not detect. Therefore, GWR was the best model overall for explaining the spatial variation in housing values in Philadelphia.
+In this report, we conducted a comparative analysis of four regression model in predicting median house values across Philadelphia: Ordinary Least Squares (OLS), Spatial Lag, Spatial Error, and Geographically Weighted Regression (GWR). While OLS provided a useful baseline, we found significant spatial autocorrelation in its residuals (Moran’s I ≈ 0.31), indicating a violation of model assumptions. Both the Spatial Lag and Spatial Error models improved upon OLS by accounting for spatial dependencies, and the Likelihood Ratio tests confirmed that these models were statistically superior to OLS. However, GWR outperformed all other models, achieving the highest R² (≈ 0.848) and the lowest residual spatial autocorrelation (Moran’s I ≈ 0.03). Moreover, it provided localized insight into how each predictor’s influence varied across neighborhoods, revealing nuanced spatial patterns that global models could not detect. Therefore, GWR was the best model overall for explaining the spatial variation in the log transformed median housing values in Philadelphia.
 
-Despite its strengths, the analysis faced several limitations. First, key OLS assumptions were violated. The Breusch-Pagan, Koenker-Bassett, and White tests all indicated significant heteroscedasticity, meaning that the variance of residuals was not constant. Additionally, the Jarque-Bera test showed non-normal residuals, and significant spatial autocorrelation was present in the OLS residuals, violating the independence assumption. While spatial models addressed the issue of spatial autocorrelation, they still rely on assumptions such as linearity and homoscedasticity, which may not hold perfectly in real-world spatial datasets. Lastly, multicollinearity among predictors was not directly tested and could affect coefficient stability, particularly in GWR.
+While GWR offers several advantages, such as cpaturing spatial heterogeneity and providing localized insight, it also has limitations. Most notably, a lot of assumptions we have in OLS regression still hold in GWR, such as lineraity, homoscedasticity, and normality of residuals. For example, from our previous assignment, we know that there's multicollinarity between predictors, like higher education attainment is associated with lower poverty rate. Our current GWR model does not account for that. We also know that some of our predictors are not normally distributed, like `PCTSINGLES`. Lastly, the residuals of the GWR are also not perfectly normally distributed, as shown in the histogram. These limitations suggest that while GWR is a powerful tool for spatial analysis and explorative analysis, it should be used in conjunction with other methods and diagnostics to ensure robust and reliable results.
 
-It’s important to clarify a common point of confusion: weighted residuals and spatial lag model residuals are not the same. Weighted (or spatially lagged) residuals are created by averaging the residuals of a spatial unit's neighbors, as defined by a spatial weights matrix. These are used in diagnostic plots (e.g., Moran’s I scatterplots) to detect spatial patterns in residuals. In contrast, spatial lag model residuals are the actual model errors (observed - predicted) from a regression that includes a spatially lagged dependent variable as a predictor. These residuals result after accounting for the endogenous influence of nearby outcome values. It is critical to use precise terminology: “spatially lagged residuals” should not be used to describe residuals from a spatial lag model; rather, it refers to the spatial average of residuals from another model (e.g., OLS or GWR).
+It’s important to clarify a common point of confusion: **weighted residuals or spatially lagged residuals** and **spatial lag model residuals** are not the same. **Weighted (or spatially lagged) residuals** are created by averaging the residuals of a spatial unit's neighbors, as defined by a spatial weights matrix. These are used in diagnostic plots (e.g., Moran’s I scatterplots) to detect spatial patterns in residuals. In contrast, spatial lag model residuals are the actual model errors **(observed - predicted)** from a regression that includes a spatially lagged dependent variable as a predictor. These residuals result after accounting for the endogenous influence of nearby outcome values. It is critical to use precise terminology: “spatially lagged residuals” should not be used to describe residuals from a spatial lag model; rather, it refers to the spatial average of residuals from another model (e.g., OLS or GWR).
 
 Finally, while ArcGIS offers tools for running GWR, it presents several limitations. ArcGIS lacks flexibility in customizing bandwidth selection, kernel type, or weighting functions. More importantly, it does not provide full diagnostic outputs such as local standard errors, residuals, or detailed summaries of model performance. This restricts the user's ability to evaluate model quality or detect multicollinearity and violates reproducibility standards common in research. In contrast, R’s *spgwr package* allows transparent control over model parameters and facilitates detailed post-model diagnostics, making it a more robust environment for conducting GWR analysis.
