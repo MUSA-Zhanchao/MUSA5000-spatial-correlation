@@ -549,7 +549,7 @@ However, the histogram of residuals from the previous OLS regression suggests a 
 residual_data <- data.frame(residuals = residuals(reg))
 
 ggplot(residual_data, aes(x = residuals)) +
-  geom_histogram(bins = 30, fill = "black") +
+  geom_histogram(bins = 100, fill = "black") +
   labs(title = "Histogram of Standardized Residuals",
        x = "Standardized Residuals",
        y = "Frequency") +
@@ -686,7 +686,7 @@ Both the Moran’s I statistic and the positive beta coefficient from the regres
 
 The spatial lag model includes the spatial lag of the dependent variable (log-transformed median house value) as a addition predictors to account for spatial autocorrelation, ($\rho W \times \text{LNMEDHVAL}$).  $\rho$ is the coefficient of the spatial lag of the dependent variable (`LNMEDHVAL`) and $W$ is the spatial weights matrix.
 
-As shown in the spatial lag regression model results below, the p-value of the spatial lag coefficient is **less than 0.001**, indicating that the spatial lag of the dependent variable is statistically significant. The coefficient of the spatial lag of `LNMEDHVAL` is **0.651**, indicating that the neighboring areas median house value rise by 1%, lead to a average 0.651% increase in the focal area's median house value, holding other predictors constant. This also suggests the presence of the positive spatial autocorrelation in the dependent variable, as $\rho >0$, where high-value areas are surrounded by other high-value areas.
+As shown in the spatial lag regression model results below, the p-value of the spatial lag coefficient is **less than 0.001**, indicating that the spatial lag of the dependent variable is statistically significant. The coefficient of the spatial lag of `LNMEDHVAL` is **0.651**, indicating that a 1% increase in the median home value of neighboring areas (as defined by Queen contiguity) is associated with an approximate 0.65% increase in the focal area's median home value, holding other predictors constant. This also suggests the presence of the positive spatial autocorrelation in the dependent variable, as $\rho >0$, where high-value areas are surrounded by other high-value areas.
 
 All other predictors in the spatial lag model, including `PCTVACANT`, `PCTSINGLES`, `PCTBACHMOR`, and `LNNBELPOV`, are also statistically significant.
 
@@ -782,7 +782,7 @@ ggplot(data = data.frame(
         axis.title=element_text(size=8))
 ```
 
-### Spatial Error Model
+### Spatial Error Regression
 
 The spatial error model includes the spatial error term ($\lambda W \times \epsilon + u$) to account for spatial autocorrelation in the residuals. $\lambda$ is the coefficient of the spatial error term, and $W$ is the spatial weights matrix. $u$ is the random noise.
 
@@ -802,9 +802,13 @@ Similar to spatial lag regression, when comparing these results with the OLS reg
 se <- errorsarlm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV, data=data, queenlist)
 summary(se)
 ```
+Based on the results of Breush-Pegan test, the spatial error residuals are also heteroscedastic. The test statistics is **BP = 211 with degree of freedom = 4 and p-value < 0.0001**. Since the p-value us less than 0.001, we reject the null hypothesis of homoscedasticity. This indicates that the residuals of the spatial error model are heteroscedastic. However, as mentioned above, the breusch-pagan test is very sensitive and conservative to minor deviations from homoscedasticity.
+
 ```{r}
 bptest.Sarlm(se, studentize=FALSE)
 ```
+We also compared the **AIC, Schwarz Criterion, and Log Likelihood** of the OLS regression, spatial lag regression, and spatial error regression models. The results show that the spatial error model provides a better fit compared to the OLS model, but not as good as the spatial lag model, as indicated by the larger AIC and Schwarz Criterion values than the spatial lag model but smaller than the OLS model. The log likelihood of the spatial error model is also higher than the OLS model, suggesting that the spatial error model explains more variance in the dependent variable.
+
 ```{r}
 aic_se <- AIC(se)
 
@@ -817,22 +821,27 @@ loglik_se <- logLik(se)
 results <- data.frame(
   Model = c("OLS Regression", "Spatial Lag Regression", "Spatial Error Regression"),
   AIC = c(aic_ols, aic_sl, aic_se),
-  SchwarzCriterion = c(bic_ols, bic_sl, bic_se),
-  LogLikelihood = c(loglik_ols, loglik_sl, loglik_se)
+  Schwarz_Criterion = c(bic_ols, bic_sl, bic_se),
+  Log_Likelihood = c(loglik_ols, loglik_sl, loglik_se)
 )
 
 results %>%
   kable(row.names = FALSE) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
+The Likehood Ratio Test also indicates that the spatial error model is a significantly better fit than the OLS model. The test statistic results shows **LR = 678** with a p-value less than **0.0001**. With a larger test statistic and low p-value, it also indicate that the spatial error model has a better fit than the OLS model.
 ```{r}
 lr_test <- LR.Sarlm(se,reg)
 lr_test
 ```
+FInally, we examined the Moran's I for spatial error model's residuals. The observed Moran's I of -0.09 suggests a small negative spatial autocorrelation in the residuals of the spatial error model. The p-value of the Moran's I test is **0.002**, indicating that the spatial autocorrelation in the residuals is statistically significant. We reject the null hypothesis of no spatial autocorrelation. However, the Moran's I value is close enough to zero, especially compared to OLS model, which suggests that the spatial error model has effectively addressed the most of the spatial dependencies in the data.
+
 ```{r}
 se_moranMc<-moran.mc(residuals(se), queenlist,999, alternative="two.sided")
 se_moranMc
 ```
+The residual histogram and the scatter plot of the residuals also support that the spatial error model has effectively addressed the spatial autocorrelation in the residuals compared to OLS. The histogram shows a more normal distribution of residuals. The scatter plot shows a weaker relationship between residuals and their spatial lag, indicating that the spatial error model has reduced the spatial autocorrelation in the residuals. All of these results indicate that the spatial error model is a better fit for the data than the OLS model.
+
 ```{r}
 ggplot(data.frame(res = residuals(se)), aes(x = res)) +
   geom_histogram(bins = 100, fill = "#283d3b") +
@@ -961,7 +970,7 @@ The histogram and scatterplot demonstrate that the GWR model significantly reduc
 ```{r}
 residuals_gwr <- results_gwr$gwr.e
 ggplot(data.frame(res = residuals_gwr), aes(x = res)) +
-  geom_histogram(bins = 50, fill = "#283d3b") +
+  geom_histogram(bins = 100, fill = "#283d3b") +
   geom_vline(xintercept = GWR_moranMc$statistic, color = "#c44536", linetype = 'dashed', size = 1) +
   labs(title = "Observed and Permuted Moran's I of GWR Residuals",
        subtitle = "Observed Moran's I in Red",
