@@ -591,20 +591,19 @@ data$OLS_RESIDU_quant <- cut(
 )
 
 ggplot(data) +
-  geom_sf(aes(fill = OLS_RESIDU_quant)) +
+  geom_sf(aes(fill = OLS_RESIDU_quant), color=NA) +
   scale_fill_brewer(palette = "Reds", name = "Standardized OLS Residuals") +
   labs(title = "Standardised OLS Residuals") +
-  theme(legend.position="right",
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks =element_blank(),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.subtitle = element_text(size = 9,face = "italic"),
+  theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
         plot.title = element_text(size = 20, face = "bold"),
         panel.background = element_blank(),
-        panel.border = element_rect(colour = "grey", fill=NA, linewidth=0.8)
-        )
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
 ```
 
 We further **test the presence of spatial autocorrelation in two ways**: 1) by regressing residuals on their queen neighbors, and 2) by looking at the Moran’s I of the residuals.
@@ -1000,50 +999,120 @@ ggplot(data = data.frame(
 
 While the global GWR model provides an improved overall fit, it is equally important to assess how predictor effects and model performance vary across space. This section presents maps of **t-values** (coefficient divided by standard error) for each predictor and a choropleth of **local R²** values. These visualizations help identify where predictors are locally significant and how well the model fits in different neighborhoods.
 
-We begin by calculating the t-values for each coefficient:
+We begin by calculating the t-values for each coefficient. These t-value maps reveal substantial geographic variation in predictor significance.
 
-```{r}
+- The vacancy rate generally has a negative impact on housing values, with significant negative effects observed in Center City and parts of North and West Philadelphia. However, there is a localize area in the southern Center City where the vacancy rate has a positive impact on housing values.
+- Single-family housing percentage positively impacts the median housing values, particularly in the northeast and northwest areas of Philadelphia.However, in some parts of the city, like the eastern Philadelphia, parts of the west and the south, the percentage of single-family housing has a negative impact on housing values.
+- The percentage of residents with a bachelor's degree or higher has a positive impact on housing values across the city, with no areas showing a negative impact.
+- The poverty rate generally has a negative effect on median housing values. This effect is more significant in southern, eastern, and northeastern parts of Philadelphia.
 
-# t-values (coefficient / standard error)
+Overall, these spatial variations in predictor significance highlight the importance of considering local effects when modeling housing values in Philadelphia.
+
+```{r, fig.width=12, fig.height=10}
 data$t_PCTVACANT   <- results_gwr$PCTVACANT   / results_gwr$PCTVACANT_se
 data$t_PCTSINGLES  <- results_gwr$PCTSINGLES  / results_gwr$PCTSINGLES_se
 data$t_PCTBACHMOR  <- results_gwr$PCTBACHMOR  / results_gwr$PCTBACHMOR_se
 data$t_LNNBELPOV   <- results_gwr$LNNBELPOV   / results_gwr$LNNBELPOV_se
 
-make_tval_map <- function(df, variable, title) {
-  breaks <- classInt::classIntervals(df[[variable]], n = 5, style = "quantile")$brks
-  labels <- sapply(1:(length(breaks) - 1), function(i) {
-    paste0(round(breaks[i], 2), " to ", round(breaks[i + 1], 2))
-  })
-  df$cat <- cut(df[[variable]], breaks = breaks, include.lowest = TRUE, labels = labels)
+data$t_PCTVACANT_cat <- cut(data$t_PCTVACANT,
+                        breaks = c(-Inf, -2, 0, 2, Inf),
+                        labels = c("< -2", "-2 to 0", "0 to 2", "> 2"))
+data$t_PCTSINGLES_cat <- cut(data$t_PCTSINGLES,
+                            breaks = c(-Inf, -2, 0, 2, Inf),
+                            labels = c("< -2", "-2 to 0", "0 to 2", "> 2"))
 
-  ggplot(df) +
-    geom_sf(aes(fill = cat), color = NA) +
-    scale_fill_brewer(palette = "RdBu", name = "t-value") +
-    labs(title = title) +
-    theme_light() +
-    theme(
-      plot.title = element_text(size = 14, face = "bold"),
-      legend.title = element_text(size = 9),
-      legend.text = element_text(size = 8),
-      axis.text = element_blank(),
-      axis.ticks = element_blank(),
-      axis.title = element_blank(),
-      panel.border = element_rect(colour = "grey", fill = NA, linewidth = 0.6)
-    )
-}
+data$t_PCTBACHMOR_cat <- cut(data$t_PCTBACHMOR,
+                            breaks = c(-Inf, -2, 0, 2, Inf),
+                            labels = c("< -2", "-2 to 0", "0 to 2", "> 2"))
 
-p1 <- make_tval_map(data, "t_PCTVACANT", "t-value: PCTVACANT")
-p2 <- make_tval_map(data, "t_PCTSINGLES", "t-value: PCTSINGLES")
-p3 <- make_tval_map(data, "t_PCTBACHMOR", "t-value: PCTBACHMOR")
-p4 <- make_tval_map(data, "t_LNNBELPOV", "t-value: LNNBELPOV")
+data$t_LNNBELPOV_cat <- cut(data$t_LNNBELPOV,
+                            breaks = c(-Inf, -2, 0, 2, Inf),
+                            labels = c("< -2", "-2 to 0", "0 to 2", "> 2"))
 
-(p1 + p2) / (p3 + p4)
+
+p1 <- ggplot(data) +
+    geom_sf(aes(fill = t_PCTVACANT_cat), color = NA) +
+    scale_fill_manual(
+      values = c("#2b2d42", "#8d99ae", "#ff4d6d", "#800f2f"),
+      name = "Ratio Category"
+    ) +
+   labs(title = "PCTVACANT Coefficient to Standard Error",
+       x = "", y = "") +
+   theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
+
+p2 <- ggplot(data) +
+    geom_sf(aes(fill = t_PCTSINGLES_cat), color = NA) +
+    scale_fill_manual(
+      values = c("#2b2d42", "#8d99ae", "#ff4d6d", "#800f2f"),
+      name = "Ratio Category"
+    ) +
+   labs(title = "PCTSINGLES Coefficient to Standard Error",
+       x = "", y = "") +
+   theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
+
+
+p3 <- ggplot(data) +
+    geom_sf(aes(fill = t_PCTBACHMOR_cat), color = NA) +
+    scale_fill_manual(
+      values = c("#ff4d6d", "#800f2f"),
+      name = "Ratio Category"
+    ) +
+   labs(title = "PCTBACHMOR Coefficient to Standard Error",
+       x = "", y = "") +
+   theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
+
+p4 <- ggplot(data) +
+    geom_sf(aes(fill = t_LNNBELPOV_cat), color = NA) +
+    scale_fill_manual(
+      values = c("#2b2d42", "#8d99ae", "#ff4d6d"),
+      name = "Ratio Category"
+    ) +
+   labs(title = "LNNBELPOV Coefficient to Standard Error",
+       x = "", y = "") +
+   theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
+
+p1 + p2 + p3 + p4 +
+  plot_layout(ncol = 2)
 ```
 
-These t-value maps reveal substantial geographic variation in predictor significance. For example, PCTVACANT is statistically significant in parts of West and North Philadelphia, while PCTBACHMOR shows significance more broadly across affluent regions. LNNBELPOV is notably significant in many central areas, suggesting poverty’s localized influence on house values.
 
-Next, we explore model fit at the local level by visualizing the local R² values from the GWR model.
+Next, we explore model fit at the local level by visualizing the local R² values from the GWR model. The choropleth map of local R² illustrates the spatial variation in how well the GWR model explains median house values across Philadelphia. Most neighborhoods fall within a moderate to high explanatory range, with local R² values commonly between 0.59 and 0.74. Particularly strong model performance is observed in South Philadelphia, Roxborough–Manayunk, and portions of the Far Northeast, where local R² values exceed 0.74. These areas exhibit stronger spatial relationships between the predictors and housing values. In contrast, several central and north-central tracts, especially around Center City and North Philadelphia, show lower local R² values (as low as 0.17), suggesting the model does not capture as much of the local variation in these areas. This could be due to the influence of unobserved neighborhood characteristics, development dynamics, or non-linear relationships not accounted for by the current predictors.
 
 ```{r}
 data$localR2 <- results_gwr$localR2
@@ -1056,21 +1125,19 @@ data$localR2_cat <- cut(data$localR2, breaks = breaks, include.lowest = TRUE, la
 
 ggplot(data) +
   geom_sf(aes(fill = localR2_cat), color = NA) +
-  scale_fill_brewer(palette = "Purples", name = "Local R²") +
+  scale_fill_brewer(palette = "Reds", name = "Local R²") +
   labs(title = "Local R² Values from GWR") +
-  theme_light() +
-  theme(
-    plot.title = element_text(size = 16, face = "bold"),
-    legend.title = element_text(size = 10),
-    legend.text = element_text(size = 9),
-    axis.text = element_blank(),
-    axis.ticks = element_blank(),
-    axis.title = element_blank(),
-    panel.border = element_rect(colour = "grey", fill = NA, linewidth = 0.6)
-  )
+  theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
 ```
-
-The choropleth map of local R² illustrates the spatial variation in how well the GWR model explains median house values across Philadelphia. Most neighborhoods fall within a moderate to high explanatory range, with local R² values commonly between 0.59 and 0.74. Particularly strong model performance is observed in South Philadelphia, Roxborough–Manayunk, and portions of the Far Northeast, where local R² values exceed 0.74. These areas exhibit stronger spatial relationships between the predictors and housing values. In contrast, several central and north-central tracts, especially around Center City and North Philadelphia, show lower local R² values (as low as 0.17), suggesting the model does not capture as much of the local variation in these areas. This could be due to the influence of unobserved neighborhood characteristics, development dynamics, or non-linear relationships not accounted for by the current predictors.
 
 Together, these spatial diagnostics confirm that the relationships between predictors and median house values are not constant across space, further supporting the case for using GWR over global regression models.
 
