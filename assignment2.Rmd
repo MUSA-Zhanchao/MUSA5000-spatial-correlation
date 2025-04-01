@@ -1014,27 +1014,27 @@ data$t_PCTSINGLES  <- results_gwr$PCTSINGLES  / results_gwr$PCTSINGLES_se
 data$t_PCTBACHMOR  <- results_gwr$PCTBACHMOR  / results_gwr$PCTBACHMOR_se
 data$t_LNNBELPOV   <- results_gwr$LNNBELPOV   / results_gwr$LNNBELPOV_se
 
-data$t_PCTVACANT_cat <- cut(data$t_PCTVACANT, 
-                        breaks = c(-Inf, -2, 0, 2, Inf), 
+data$t_PCTVACANT_cat <- cut(data$t_PCTVACANT,
+                        breaks = c(-Inf, -2, 0, 2, Inf),
                         labels = c("< -2", "-2 to 0", "0 to 2", "> 2"))
-data$t_PCTSINGLES_cat <- cut(data$t_PCTSINGLES, 
-                            breaks = c(-Inf, -2, 0, 2, Inf), 
+data$t_PCTSINGLES_cat <- cut(data$t_PCTSINGLES,
+                            breaks = c(-Inf, -2, 0, 2, Inf),
                             labels = c("< -2", "-2 to 0", "0 to 2", "> 2"))
 
 data$t_PCTBACHMOR_cat <- cut(data$t_PCTBACHMOR,
-                            breaks = c(-Inf, -2, 0, 2, Inf), 
+                            breaks = c(-Inf, -2, 0, 2, Inf),
                             labels = c("< -2", "-2 to 0", "0 to 2", "> 2"))
 
 data$t_LNNBELPOV_cat <- cut(data$t_LNNBELPOV,
-                            breaks = c(-Inf, -2, 0, 2, Inf), 
+                            breaks = c(-Inf, -2, 0, 2, Inf),
                             labels = c("< -2", "-2 to 0", "0 to 2", "> 2"))
 
 
 p1 <- ggplot(data) +
-    geom_sf(aes(fill = t_PCTVACANT_cat), color = NA) +  
+    geom_sf(aes(fill = t_PCTVACANT_cat), color = NA) +
     scale_fill_manual(
-      values = c("#2b2d42", "#8d99ae", "#ff4d6d", "#800f2f"), 
-      name = "Ratio Category"  
+      values = c("#2b2d42", "#8d99ae", "#ff4d6d", "#800f2f"),
+      name = "Ratio Category"
     ) +
    labs(title = "PCTVACANT Coefficient to Standard Error",
        x = "", y = "") +
@@ -1050,10 +1050,10 @@ p1 <- ggplot(data) +
         panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
 
 p2 <- ggplot(data) +
-    geom_sf(aes(fill = t_PCTSINGLES_cat), color = NA) +  
+    geom_sf(aes(fill = t_PCTSINGLES_cat), color = NA) +
     scale_fill_manual(
-      values = c("#2b2d42", "#8d99ae", "#ff4d6d", "#800f2f"), 
-      name = "Ratio Category"  
+      values = c("#2b2d42", "#8d99ae", "#ff4d6d", "#800f2f"),
+      name = "Ratio Category"
     ) +
    labs(title = "PCTSINGLES Coefficient to Standard Error",
        x = "", y = "") +
@@ -1070,10 +1070,10 @@ p2 <- ggplot(data) +
 
 
 p3 <- ggplot(data) +
-    geom_sf(aes(fill = t_PCTBACHMOR_cat), color = NA) +  
+    geom_sf(aes(fill = t_PCTBACHMOR_cat), color = NA) +
     scale_fill_manual(
-      values = c("#ff4d6d", "#800f2f"), 
-      name = "Ratio Category"  
+      values = c("#ff4d6d", "#800f2f"),
+      name = "Ratio Category"
     ) +
    labs(title = "PCTBACHMOR Coefficient to Standard Error",
        x = "", y = "") +
@@ -1089,10 +1089,10 @@ p3 <- ggplot(data) +
         panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
 
 p4 <- ggplot(data) +
-    geom_sf(aes(fill = t_LNNBELPOV_cat), color = NA) +  
+    geom_sf(aes(fill = t_LNNBELPOV_cat), color = NA) +
     scale_fill_manual(
-      values = c("#2b2d42", "#8d99ae", "#ff4d6d"), 
-      name = "Ratio Category"  
+      values = c("#2b2d42", "#8d99ae", "#ff4d6d"),
+      name = "Ratio Category"
     ) +
    labs(title = "LNNBELPOV Coefficient to Standard Error",
        x = "", y = "") +
@@ -1107,7 +1107,7 @@ p4 <- ggplot(data) +
         panel.background = element_blank(),
         panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
 
-p1 + p2 + p3 + p4 + 
+p1 + p2 + p3 + p4 +
   plot_layout(ncol = 2)
 ```
 
