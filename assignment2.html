@@ -1664,34 +1664,34 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ef2929; } 
-code span.an { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.at { color: #204a87; } 
-code span.bn { color: #0000cf; } 
-code span.cf { color: #204a87; font-weight: bold; } 
-code span.ch { color: #4e9a06; } 
-code span.cn { color: #8f5902; } 
-code span.co { color: #8f5902; font-style: italic; } 
-code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.do { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.dt { color: #204a87; } 
-code span.dv { color: #0000cf; } 
-code span.er { color: #a40000; font-weight: bold; } 
-code span.ex { } 
-code span.fl { color: #0000cf; } 
-code span.fu { color: #204a87; font-weight: bold; } 
-code span.im { } 
-code span.in { color: #8f5902; font-weight: bold; font-style: italic; } 
-code span.kw { color: #204a87; font-weight: bold; } 
-code span.op { color: #ce5c00; font-weight: bold; } 
-code span.ot { color: #8f5902; } 
-code span.pp { color: #8f5902; font-style: italic; } 
-code span.sc { color: #ce5c00; font-weight: bold; } 
-code span.ss { color: #4e9a06; } 
-code span.st { color: #4e9a06; } 
-code span.va { color: #000000; } 
-code span.vs { color: #4e9a06; } 
-code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } 
+code span.al { color: #ef2929; }
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; }
+code span.at { color: #204a87; }
+code span.bn { color: #0000cf; }
+code span.cf { color: #204a87; font-weight: bold; }
+code span.ch { color: #4e9a06; }
+code span.cn { color: #8f5902; }
+code span.co { color: #8f5902; font-style: italic; }
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; }
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; }
+code span.dt { color: #204a87; }
+code span.dv { color: #0000cf; }
+code span.er { color: #a40000; font-weight: bold; }
+code span.ex { }
+code span.fl { color: #0000cf; }
+code span.fu { color: #204a87; font-weight: bold; }
+code span.im { }
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; }
+code span.kw { color: #204a87; font-weight: bold; }
+code span.op { color: #ce5c00; font-weight: bold; }
+code span.ot { color: #8f5902; }
+code span.pp { color: #8f5902; font-style: italic; }
+code span.sc { color: #ce5c00; font-weight: bold; }
+code span.ss { color: #4e9a06; }
+code span.st { color: #4e9a06; }
+code span.va { color: #000000; }
+code span.vs { color: #4e9a06; }
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; }
 .sourceCode .row {
 width: 100%;
 }
@@ -2458,13 +2458,13 @@ autocorrelation in <code>LNMEDHVAL</code> is statistically
 significant.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>globalmoranMC<span class="ot">&lt;-</span><span class="fu">moran.mc</span>(data<span class="sc">$</span>LNMEDHVAL, queenlist, <span class="at">nsim=</span><span class="dv">999</span>, <span class="at">alternative=</span><span class="st">&quot;two.sided&quot;</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>globalmoranMC</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Monte-Carlo simulation of Moran I
-## 
-## data:  data$LNMEDHVAL 
-## weights: queenlist  
-## number of simulations + 1: 1000 
-## 
+##
+## data:  data$LNMEDHVAL
+## weights: queenlist
+## number of simulations + 1: 1000
+##
 ## statistic = 0.8, observed rank = 1000, p-value &lt;0.0000000000000002
 ## alternative hypothesis: two.sided</code></pre>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">data.frame</span>(<span class="at">res =</span> globalmoranMC<span class="sc">$</span>res), <span class="fu">aes</span>(<span class="at">x =</span> res)) <span class="sc">+</span></span>
@@ -2687,17 +2687,17 @@ as indicated by the R-squared value of 0.662. (Detailed interpretation
 can be found in our previous report.)</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>reg<span class="ot">&lt;-</span><span class="fu">lm</span>(LNMEDHVAL <span class="sc">~</span> LNNBELPOV<span class="sc">+</span>PCTBACHMOR<span class="sc">+</span>PCTSINGLES<span class="sc">+</span>PCTVACANT, <span class="at">data=</span>data)</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">summary</span>(reg)</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ## Call:
-## lm(formula = LNMEDHVAL ~ LNNBELPOV + PCTBACHMOR + PCTSINGLES + 
+## lm(formula = LNMEDHVAL ~ LNNBELPOV + PCTBACHMOR + PCTSINGLES +
 ##     PCTVACANT, data = data)
-## 
+##
 ## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -2.2582 -0.2039  0.0382  0.2174  2.2434 
-## 
+##     Min      1Q  Median      3Q     Max
+## -2.2582 -0.2039  0.0382  0.2174  2.2434
+##
 ## Coefficients:
-##              Estimate Std. Error t value             Pr(&gt;|t|)    
+##              Estimate Std. Error t value             Pr(&gt;|t|)
 ## (Intercept) 11.113778   0.046532  238.84 &lt; 0.0000000000000002 ***
 ## LNNBELPOV   -0.078903   0.008457   -9.33 &lt; 0.0000000000000002 ***
 ## PCTBACHMOR   0.020910   0.000543   38.49 &lt; 0.0000000000000002 ***
@@ -2705,9 +2705,9 @@ can be found in our previous report.)</p>
 ## PCTVACANT   -0.019156   0.000978  -19.59 &lt; 0.0000000000000002 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
+##
 ## Residual standard error: 0.366 on 1715 degrees of freedom
-## Multiple R-squared:  0.662,  Adjusted R-squared:  0.662 
+## Multiple R-squared:  0.662,  Adjusted R-squared:  0.662
 ## F-statistic:  841 on 4 and 1715 DF,  p-value: &lt;0.0000000000000002</code></pre>
 <p>Despite the assumptions we tested in OLS regression, we detect other
 two assumptions further by statistics test,
@@ -2730,9 +2730,9 @@ hypothesis of homoscedasticity.</p>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>reg<span class="ot">&lt;-</span><span class="fu">lm</span>(LNMEDHVAL <span class="sc">~</span> LNNBELPOV<span class="sc">+</span>PCTBACHMOR<span class="sc">+</span>PCTSINGLES<span class="sc">+</span>PCTVACANT, <span class="at">data=</span>data)</span>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a></span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="fu">bptest</span>(reg, <span class="at">studentize=</span><span class="cn">FALSE</span>)</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Breusch-Pagan test
-## 
+##
 ## data:  reg
 ## BP = 113, df = 4, p-value &lt;0.0000000000000002</code></pre>
 <p><strong>The p-value of the Koenker-Bassett test is also less than
@@ -2740,9 +2740,9 @@ hypothesis of homoscedasticity.</p>
 heteroscedasticity.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># Koenker-Bassett Test</span></span>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">bptest</span>(reg)</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  studentized Breusch-Pagan test
-## 
+##
 ## data:  reg
 ## BP = 43, df = 4, p-value = 0.00000001</code></pre>
 <p><strong>The p-value of the White test is 0, much less than
@@ -2751,7 +2751,7 @@ heteroscedasticity.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co">#White Test</span></span>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">white_test</span>(reg)</span></code></pre></div>
 <pre><code>## White&#39;s test results
-## 
+##
 ## Null hypothesis: Homoskedasticity of the residuals
 ## Alternative hypothesis: Heteroskedasticity of the residuals
 ## Test Statistic: 43.94
@@ -2815,9 +2815,9 @@ not follow a normal distribution, which may impact the validity of
 standard inferential procedures.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co">#Jarque-Bera Test</span></span>
 <span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">jarque.bera.test</span>(reg<span class="sc">$</span>residuals)</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Jarque Bera Test
-## 
+##
 ## data:  reg$residuals
 ## X-squared = 779, df = 2, p-value &lt;0.0000000000000002</code></pre>
 <p>However, the histogram of residuals from the previous OLS regression
@@ -2940,13 +2940,13 @@ significant.</p>
 <pre><code>## [1] 0.312</code></pre>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>moranMC<span class="ot">&lt;-</span><span class="fu">moran.mc</span>(data<span class="sc">$</span>OLS_RESIDU, queenlist, <span class="at">nsim=</span><span class="dv">999</span>, <span class="at">alternative=</span><span class="st">&quot;two.sided&quot;</span>)  <span class="co">#We use 999 permutations</span></span>
 <span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>moranMC</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Monte-Carlo simulation of Moran I
-## 
-## data:  data$OLS_RESIDU 
-## weights: queenlist  
-## number of simulations + 1: 1000 
-## 
+##
+## data:  data$OLS_RESIDU
+## weights: queenlist
+## number of simulations + 1: 1000
+##
 ## statistic = 0.3, observed rank = 1000, p-value &lt;0.0000000000000002
 ## alternative hypothesis: two.sided</code></pre>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">data.frame</span>(<span class="at">res =</span> moranMC<span class="sc">$</span>res), <span class="fu">aes</span>(<span class="at">x =</span> res)) <span class="sc">+</span></span>
@@ -3052,32 +3052,32 @@ OLS model overestimates the influence of these predictors because of
 omitted spatial autocorrelation.</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>sl <span class="ot">&lt;-</span> <span class="fu">lagsarlm</span>(LNMEDHVAL <span class="sc">~</span> PCTVACANT <span class="sc">+</span> PCTSINGLES <span class="sc">+</span> PCTBACHMOR <span class="sc">+</span> LNNBELPOV, <span class="at">data=</span>data, queenlist)</span>
 <span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a><span class="fu">summary</span>(sl)</span></code></pre></div>
-<pre><code>## 
-## Call:lagsarlm(formula = LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + 
+<pre><code>##
+## Call:lagsarlm(formula = LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR +
 ##     LNNBELPOV, data = data, listw = queenlist)
-## 
+##
 ## Residuals:
-##       Min        1Q    Median        3Q       Max 
-## -1.655421 -0.117248  0.018654  0.133126  1.726436 
-## 
-## Type: lag 
-## Coefficients: (asymptotic standard errors) 
+##       Min        1Q    Median        3Q       Max
+## -1.655421 -0.117248  0.018654  0.133126  1.726436
+##
+## Type: lag
+## Coefficients: (asymptotic standard errors)
 ##                Estimate  Std. Error  z value              Pr(&gt;|z|)
 ## (Intercept)  3.89845489  0.20111357  19.3843 &lt; 0.00000000000000022
 ## PCTVACANT   -0.00852940  0.00074367 -11.4694 &lt; 0.00000000000000022
 ## PCTSINGLES   0.00203342  0.00051577   3.9425         0.00008063503
 ## PCTBACHMOR   0.00851381  0.00052193  16.3120 &lt; 0.00000000000000022
 ## LNNBELPOV   -0.03405466  0.00629287  -5.4116         0.00000006246
-## 
+##
 ## Rho: 0.651, LR test value: 912, p-value: &lt; 0.000000000000000222
 ## Asymptotic standard error: 0.0180
 ##     z-value: 36.1, p-value: &lt; 0.000000000000000222
 ## Wald statistic: 1301, p-value: &lt; 0.000000000000000222
-## 
+##
 ## Log likelihood: -256 for lag model
 ## ML residual variance (sigma squared): 0.0719, (sigma: 0.268)
-## Number of observations: 1720 
-## Number of parameters estimated: 7 
+## Number of observations: 1720
+## Number of parameters estimated: 7
 ## AIC: 525, (AIC for lm: 1435)
 ## LM test for residual autocorrelation
 ## test value: 67.7, p-value: 0.00000000000000022204</code></pre>
@@ -3089,10 +3089,10 @@ heteroscedasticity. The test statistic for the spatial lag regression is
 hypothesis of homosceaasticity, indicating that the residuals of the
 spatial lag model are still heteroscedastic.</p>
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="fu">bptest.Sarlm</span>(sl, <span class="at">studentize=</span><span class="cn">FALSE</span>)</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Breusch-Pagan test
-## 
-## data:  
+##
+## data:
 ## BP = 211, df = 4, p-value &lt;0.0000000000000002</code></pre>
 <p>We also compared the <strong>AIC, Schwarz Criterion, and Log
 Likelihood</strong> of the OLS regression and the spatial lag regression
@@ -3185,13 +3185,13 @@ less than <strong>0.0001</strong>, indicating that the spatial lag model
 is a significantly better fit than the OLS model.</p>
 <div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>lr_test <span class="ot">&lt;-</span> <span class="fu">LR.Sarlm</span>(sl, reg)</span>
 <span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>lr_test</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Likelihood ratio for spatial linear models
-## 
-## data:  
+##
+## data:
 ## Likelihood ratio = 912, df = 1, p-value &lt;0.0000000000000002
 ## sample estimates:
-##  Log likelihood of sl Log likelihood of reg 
+##  Log likelihood of sl Log likelihood of reg
 ##                  -256                  -711</code></pre>
 <p>Finally, we examined Moran’s I for the spatial lag regression model’s
 residuals. The obserbed Moran’s I of -0.08 suggests a small negative
@@ -3205,13 +3205,13 @@ model has effectively addressed the most of the spatial dependencies in
 the data.</p>
 <div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>sl_moranMc<span class="ot">&lt;-</span><span class="fu">moran.mc</span>(sl<span class="sc">$</span>residuals, queenlist,<span class="dv">999</span>, <span class="at">alternative=</span><span class="st">&quot;two.sided&quot;</span>)</span>
 <span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>sl_moranMc</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Monte-Carlo simulation of Moran I
-## 
-## data:  sl$residuals 
-## weights: queenlist  
-## number of simulations + 1: 1000 
-## 
+##
+## data:  sl$residuals
+## weights: queenlist
+## number of simulations + 1: 1000
+##
 ## statistic = -0.08, observed rank = 1, p-value = 0.002
 ## alternative hypothesis: two.sided</code></pre>
 <p>The residual histogram and the scatter plot of the residuals also
@@ -3298,32 +3298,32 @@ overestimates the influence of these predictors due to omitted spatial
 autocorrelation.</p>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">errorsarlm</span>(LNMEDHVAL <span class="sc">~</span> PCTVACANT <span class="sc">+</span> PCTSINGLES <span class="sc">+</span> PCTBACHMOR <span class="sc">+</span> LNNBELPOV, <span class="at">data=</span>data, queenlist)</span>
 <span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a><span class="fu">summary</span>(se)</span></code></pre></div>
-<pre><code>## 
-## Call:errorsarlm(formula = LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + 
+<pre><code>##
+## Call:errorsarlm(formula = LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR +
 ##     LNNBELPOV, data = data, listw = queenlist)
-## 
+##
 ## Residuals:
-##       Min        1Q    Median        3Q       Max 
-## -1.926477 -0.115408  0.014889  0.133852  1.948664 
-## 
-## Type: error 
-## Coefficients: (asymptotic standard errors) 
+##       Min        1Q    Median        3Q       Max
+## -1.926477 -0.115408  0.014889  0.133852  1.948664
+##
+## Type: error
+## Coefficients: (asymptotic standard errors)
 ##                Estimate  Std. Error  z value              Pr(&gt;|z|)
 ## (Intercept) 10.90643422  0.05346780 203.9814 &lt; 0.00000000000000022
 ## PCTVACANT   -0.00578308  0.00088670  -6.5220      0.00000000006937
 ## PCTSINGLES   0.00267792  0.00062083   4.3134      0.00001607388269
 ## PCTBACHMOR   0.00981293  0.00072896  13.4615 &lt; 0.00000000000000022
 ## LNNBELPOV   -0.03453408  0.00708933  -4.8713      0.00000110882040
-## 
+##
 ## Lambda: 0.815, LR test value: 678, p-value: &lt; 0.000000000000000222
 ## Asymptotic standard error: 0.0164
 ##     z-value: 49.8, p-value: &lt; 0.000000000000000222
 ## Wald statistic: 2477, p-value: &lt; 0.000000000000000222
-## 
+##
 ## Log likelihood: -373 for error model
 ## ML residual variance (sigma squared): 0.0766, (sigma: 0.277)
-## Number of observations: 1720 
-## Number of parameters estimated: 7 
+## Number of observations: 1720
+## Number of parameters estimated: 7
 ## AIC: 759, (AIC for lm: 1435)</code></pre>
 <p>Based on the results of Breush-Pegan test, the spatial error
 residuals are also heteroscedastic. The test statistics is <strong>BP =
@@ -3334,10 +3334,10 @@ of the spatial error model are heteroscedastic. However, as mentioned
 above, the breusch-pagan test is very sensitive and conservative to
 minor deviations from homoscedasticity.</p>
 <div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="fu">bptest.Sarlm</span>(se, <span class="at">studentize=</span><span class="cn">FALSE</span>)</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Breusch-Pagan test
-## 
-## data:  
+##
+## data:
 ## BP = 23, df = 4, p-value = 0.0001</code></pre>
 <p>We also compared the <strong>AIC, Schwarz Criterion, and Log
 Likelihood</strong> of the OLS regression, spatial lag regression, and
@@ -3436,13 +3436,13 @@ it also indicate that the spatial error model has a better fit than the
 OLS model.</p>
 <div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a>lr_test <span class="ot">&lt;-</span> <span class="fu">LR.Sarlm</span>(se,reg)</span>
 <span id="cb46-2"><a href="#cb46-2" tabindex="-1"></a>lr_test</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Likelihood ratio for spatial linear models
-## 
-## data:  
+##
+## data:
 ## Likelihood ratio = 678, df = 1, p-value &lt;0.0000000000000002
 ## sample estimates:
-##  Log likelihood of se Log likelihood of reg 
+##  Log likelihood of se Log likelihood of reg
 ##                  -373                  -711</code></pre>
 <p>Finally, we examined the Moran’s I for spatial error model’s
 residuals. The observed Moran’s I of -0.09 suggests a small negative
@@ -3456,13 +3456,13 @@ model has effectively addressed the most of the spatial dependencies in
 the data.</p>
 <div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a>se_moranMc<span class="ot">&lt;-</span><span class="fu">moran.mc</span>(<span class="fu">residuals</span>(se), queenlist,<span class="dv">999</span>, <span class="at">alternative=</span><span class="st">&quot;two.sided&quot;</span>)</span>
 <span id="cb48-2"><a href="#cb48-2" tabindex="-1"></a>se_moranMc</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Monte-Carlo simulation of Moran I
-## 
-## data:  residuals(se) 
-## weights: queenlist  
-## number of simulations + 1: 1000 
-## 
+##
+## data:  residuals(se)
+## weights: queenlist
+## number of simulations + 1: 1000
+##
 ## statistic = -0.09, observed rank = 1, p-value = 0.002
 ## alternative hypothesis: two.sided</code></pre>
 <p>The residual histogram and the scatter plot of the residuals also
@@ -3530,10 +3530,10 @@ predictors and the dependent variable <code>LNMEDHVAL</code>.</p>
 <span id="cb52-16"><a href="#cb52-16" tabindex="-1"></a>results_gwr <span class="ot">&lt;-</span> model_gwr<span class="sc">$</span>SDF</span></code></pre></div>
 <div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a>model_gwr</span></code></pre></div>
 <pre><code>## Call:
-## gwr(formula = LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + 
-##     LNNBELPOV, data = as(data, &quot;Spatial&quot;), gweight = gwr.Gauss, 
+## gwr(formula = LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR +
+##     LNNBELPOV, data = as(data, &quot;Spatial&quot;), gweight = gwr.Gauss,
 ##     adapt = bw_gwr, hatmatrix = TRUE, se.fit = TRUE)
-## Kernel function: gwr.Gauss 
+## Kernel function: gwr.Gauss
 ## Adaptive quantile: 0.00813 (about 13 of 1720 data points)
 ## Summary of GWR coefficient estimates at data points:
 ##                  Min.  1st Qu.   Median  3rd Qu.     Max. Global
@@ -3542,17 +3542,17 @@ predictors and the dependent variable <code>LNMEDHVAL</code>.</p>
 ## PCTSINGLES   -0.02497 -0.00755 -0.00166  0.00423  0.01433   0.00
 ## PCTBACHMOR    0.00110  0.01014  0.01493  0.02022  0.03473   0.02
 ## LNNBELPOV    -0.23652 -0.07336 -0.04012 -0.01267  0.09488  -0.08
-## Number of data points: 1720 
-## Effective number of parameters (residual: 2traceS - traceS&#39;S): 361 
-## Effective degrees of freedom (residual: 2traceS - traceS&#39;S): 1359 
-## Sigma (residual: 2traceS - traceS&#39;S): 0.276 
-## Effective number of parameters (model: traceS): 258 
-## Effective degrees of freedom (model: traceS): 1462 
-## Sigma (model: traceS): 0.266 
-## Sigma (ML): 0.246 
-## AICc (GWR p. 61, eq 2.33; p. 96, eq. 4.21): 661 
-## AIC (GWR p. 96, eq. 4.22): 309 
-## Residual sum of squares: 104 
+## Number of data points: 1720
+## Effective number of parameters (residual: 2traceS - traceS&#39;S): 361
+## Effective degrees of freedom (residual: 2traceS - traceS&#39;S): 1359
+## Sigma (residual: 2traceS - traceS&#39;S): 0.276
+## Effective number of parameters (model: traceS): 258
+## Effective degrees of freedom (model: traceS): 1462
+## Sigma (model: traceS): 0.266
+## Sigma (ML): 0.246
+## AICc (GWR p. 61, eq 2.33; p. 96, eq. 4.21): 661
+## AIC (GWR p. 96, eq. 4.22): 309
+## Residual sum of squares: 104
 ## Quasi-global R2: 0.848</code></pre>
 <div id="global-gwr-results" class="section level3">
 <h3>Global GWR Results</h3>
@@ -3707,13 +3707,13 @@ Spatial Lag and Spatial Error residuals, suggesting GWR is more
 effective at accounting for spatial dependence.</p>
 <div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" tabindex="-1"></a>GWR_moranMc<span class="ot">&lt;-</span><span class="fu">moran.mc</span>(results_gwr<span class="sc">$</span>gwr.e, queenlist, <span class="dv">999</span>, <span class="at">alternative=</span><span class="st">&quot;two.sided&quot;</span>)</span>
 <span id="cb57-2"><a href="#cb57-2" tabindex="-1"></a>GWR_moranMc</span></code></pre></div>
-<pre><code>## 
+<pre><code>##
 ##  Monte-Carlo simulation of Moran I
-## 
-## data:  results_gwr$gwr.e 
-## weights: queenlist  
-## number of simulations + 1: 1000 
-## 
+##
+## data:  results_gwr$gwr.e
+## weights: queenlist
+## number of simulations + 1: 1000
+##
 ## statistic = 0.03, observed rank = 987, p-value = 0.03
 ## alternative hypothesis: two.sided</code></pre>
 <p>The histogram and scatterplot demonstrate that the GWR model
